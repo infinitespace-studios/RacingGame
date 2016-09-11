@@ -228,13 +228,14 @@ namespace RacingGame.Shaders
                 MultisampleCount = 4;
             }
 
-            if (sizeType == SizeType.ShadowMap ||
-                BaseGame.CurrentPlatform == PlatformID.Win32NT)
-            {
-                MultisampleCount = 0;
-            }
+            // UWP COMMENT OUT
+            //if (sizeType == SizeType.ShadowMap ||
+            //    BaseGame.CurrentPlatform == PlatformID.Win32NT)
+            //{
+            //    MultisampleCount = 0;
+            //}
 
-			outSF = SurfaceFormat.Color;
+            outSF = SurfaceFormat.Color;
 			outDF = BaseGame.BackBufferDepthFormat;
 			outMSC = MultisampleCount;
            // BaseGame.Device.Adapter.QueryRenderTargetFormat(BaseGame.Device.GraphicsProfile,

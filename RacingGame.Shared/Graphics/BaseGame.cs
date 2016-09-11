@@ -61,7 +61,8 @@ namespace RacingGame.Graphics
 
         #region Variables
 
-        public static PlatformID CurrentPlatform = Environment.OSVersion.Platform;
+        // UWP COMMENT OUT
+       // public static PlatformID CurrentPlatform = Environment.OSVersion.Platform;
 
         /// <summary>
         /// Graphics device manager, used for the graphics creation and holds
@@ -1059,27 +1060,28 @@ namespace RacingGame.Graphics
 
         void graphics_PrepareDevice(object sender, PreparingDeviceSettingsEventArgs e)
         {
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            {
-                PresentationParameters presentParams =
-                    e.GraphicsDeviceInformation.PresentationParameters;
+            // UWP COMMENT OUT
+//            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+//            {
+//                PresentationParameters presentParams =
+//                    e.GraphicsDeviceInformation.PresentationParameters;
 
-                presentParams.RenderTargetUsage = RenderTargetUsage.PlatformContents;
-                if (graphicsManager.PreferredBackBufferHeight == 720)
-                {
-                    presentParams.MultiSampleCount = 4;
-#if !DEBUG
-                    presentParams.PresentationInterval = PresentInterval.One;
-#endif
-                }
-                else
-                {
-                    presentParams.MultiSampleCount = 2;
-#if !DEBUG
-                    presentParams.PresentationInterval = PresentInterval.Two;
-#endif
-                }
-            }
+//                presentParams.RenderTargetUsage = RenderTargetUsage.PlatformContents;
+//                if (graphicsManager.PreferredBackBufferHeight == 720)
+//                {
+//                    presentParams.MultiSampleCount = 4;
+//#if !DEBUG
+//                    presentParams.PresentationInterval = PresentInterval.One;
+//#endif
+//                }
+//                else
+//                {
+//                    presentParams.MultiSampleCount = 2;
+//#if !DEBUG
+//                    presentParams.PresentationInterval = PresentInterval.Two;
+//#endif
+//                }
+//            }
         }
 
         /// <summary>

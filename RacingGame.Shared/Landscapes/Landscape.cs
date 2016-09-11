@@ -834,12 +834,14 @@ namespace RacingGame.Landscapes
         /// <param name="setLevel">Level we want to load</param>
         internal Landscape(RacingGameManager.Level setLevel)
         {
-            #region Load map height data
-            Stream file = TitleContainer.OpenStream(
-                "Content\\LandscapeHeights.data");
             byte[] heights = new byte[GridWidth * GridHeight];
-            file.Read(heights, 0, GridWidth * GridHeight);
-            file.Close();
+            #region Load map height data
+            using (Stream file = TitleContainer.OpenStream(
+                "Content\\LandscapeHeights.data"))
+            {
+
+                file.Read(heights, 0, GridWidth * GridHeight);
+            }
 
             mapHeights = new float[GridWidth, GridHeight];
             #endregion

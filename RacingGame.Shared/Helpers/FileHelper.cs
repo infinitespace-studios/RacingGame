@@ -105,17 +105,18 @@ namespace RacingGame.Helpers
         {
             try
             {
-                StreamReader reader = new StreamReader(
+                using (StreamReader reader = new StreamReader(
                     new FileStream(filename, FileMode.Open, FileAccess.Read),
-                    System.Text.Encoding.UTF8);
-                // Generic version
-                List<string> lines = new List<string>();
-                do
+                    System.Text.Encoding.UTF8))
                 {
-                    lines.Add(reader.ReadLine());
-                } while (reader.Peek() > -1);
-                reader.Close();
-                return lines.ToArray();
+                    // Generic version
+                    List<string> lines = new List<string>();
+                    do
+                    {
+                        lines.Add(reader.ReadLine());
+                    } while (reader.Peek() > -1);
+                    return lines.ToArray();
+                }
             }
             catch (FileNotFoundException)
             {

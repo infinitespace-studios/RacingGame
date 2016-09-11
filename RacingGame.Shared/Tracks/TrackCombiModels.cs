@@ -17,6 +17,9 @@ using System.Xml;
 using System.Xml.Serialization;
 using RacingGame.Helpers;
 using RacingGame.Landscapes;
+#if NETFX_CORE
+using Serializable = System.Runtime.Serialization.DataContractAttribute;
+#endif
 #endregion
 
 namespace RacingGame.Tracks
@@ -123,26 +126,25 @@ namespace RacingGame.Tracks
         /// <param name="filename">Filename</param>
         public TrackCombiModels(string filename)
         {
-            StreamReader file = new StreamReader(TitleContainer.OpenStream(
-                Directory + "\\" + filename + "." + Extension));
+            using (StreamReader file = new StreamReader(TitleContainer.OpenStream(
+                Directory + "\\" + filename + "." + Extension)))
+            {
 
-            // Load everything into this class with help of the XmlSerializer.
-            objects = (List<TrackCombiModels.CombiObject>)
-                new XmlSerializer(typeof(List<TrackCombiModels.CombiObject>)).
-                Deserialize(file.BaseStream);
+                // Load everything into this class with help of the XmlSerializer.
+                objects = (List<TrackCombiModels.CombiObject>)
+                    new XmlSerializer(typeof(List<TrackCombiModels.CombiObject>)).
+                    Deserialize(file.BaseStream);
 
-            // Close the file
-            file.Close();
+                name = Path.GetFileNameWithoutExtension(filename);
 
-            name = Path.GetFileNameWithoutExtension(filename);
-
-            // Return size 10 for palms, stones and ruins, rest gets size = 50
-            size = (Name == "CombiPalms" ||
-                    Name == "CombiPalms2" ||
-                    Name == "CombiRuins" ||
-                    Name == "CombiRuins2" ||
-                    Name == "CombiStones" ||
-                    Name == "CombiStones2") ? 10 : 50;
+                // Return size 10 for palms, stones and ruins, rest gets size = 50
+                size = (Name == "CombiPalms" ||
+                        Name == "CombiPalms2" ||
+                        Name == "CombiRuins" ||
+                        Name == "CombiRuins2" ||
+                        Name == "CombiStones" ||
+                        Name == "CombiStones2") ? 10 : 50;
+            }
         }
         #endregion
 

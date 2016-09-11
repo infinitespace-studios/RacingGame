@@ -17,6 +17,9 @@ using System.IO;
 using System.Xml.Serialization;
 using RacingGame.Helpers;
 using System.Threading;
+#if NETFX_CORE
+using Serializable = System.Runtime.Serialization.DataContractAttribute;
+#endif
 #endregion
 
 namespace RacingGame.Properties
@@ -193,7 +196,7 @@ namespace RacingGame.Properties
             }
             catch (Exception exc)
             {
-                System.Diagnostics.Trace.WriteLine("Settings Load Failure: " + exc.ToString());
+                System.Diagnostics.Debug.WriteLine("Settings Load Failure: " + exc.ToString());
             }
 
             FileHelper.StorageContainerMRE.Set();

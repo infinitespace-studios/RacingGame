@@ -16,6 +16,9 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 using RacingGame.Helpers;
+#if NETFX_CORE
+using Serializable = System.Runtime.Serialization.DataContractAttribute;
+#endif
 #endregion
 
 namespace RacingGame.Tracks
@@ -25,7 +28,7 @@ namespace RacingGame.Tracks
     /// </summary>
     public class TrackData
     {
-        #region Constants
+#region Constants
         /// <summary>
         /// Directory where all the track data files are stored.
         /// </summary>
@@ -34,15 +37,16 @@ namespace RacingGame.Tracks
         /// Extension for the track data files.
         /// </summary>
         public const string Extension = "Track";
-        #endregion
+#endregion
 
-        #region Variables
+#region Variables
         /// <summary>
         /// Track points
         /// </summary>
         private List<Vector3> trackPoints = new List<Vector3>();
 
-        #region WidthHelper class
+        
+#region WidthHelper class
         /// <summary>
         /// Width helper
         /// </summary>
@@ -76,14 +80,14 @@ namespace RacingGame.Tracks
                 scale = setScale;
             }
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Width helper position
         /// </summary>
         private List<WidthHelper> widthHelpers = new List<WidthHelper>();
 
-        #region RoadHelper class
+#region RoadHelper class
         /// <summary>
         /// Road helper
         /// </summary>
@@ -128,14 +132,14 @@ namespace RacingGame.Tracks
                 pos = setPos;
             }
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Tunnel helper position
         /// </summary>
         private List<RoadHelper> roadHelpers = new List<RoadHelper>();
 
-        #region NeutralObject class
+#region NeutralObject class
         /// <summary>
         /// Neutral object
         /// </summary>
@@ -175,15 +179,15 @@ namespace RacingGame.Tracks
                 matrix = setMatrix;
             }
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// List of neutral objects used in this level
         /// </summary>
         private List<NeutralObject> objects = new List<NeutralObject>();
-        #endregion
+#endregion
 
-        #region Properties
+#region Properties
         /// <summary>
         /// Track points
         /// </summary>
@@ -231,9 +235,9 @@ namespace RacingGame.Tracks
                 return objects;
             }
         }
-        #endregion
+#endregion
 
-        #region Constructor
+#region Constructor
         /// <summary>
         /// Create track data, empty constructor, required for Serialization.
         /// </summary>
@@ -267,21 +271,19 @@ namespace RacingGame.Tracks
         public static TrackData Load(string setFilename)
         {
             // Load track data
-            StreamReader file = new StreamReader(TitleContainer.OpenStream(
-                Directory + "\\" + setFilename + "." + Extension));
+            using (StreamReader file = new StreamReader(TitleContainer.OpenStream(
+                Directory + "\\" + setFilename + "." + Extension)))
+            {
 
-            // Load everything into this class with help of the XmlSerializer.
-            TrackData loadedTrack = (TrackData)
-                new XmlSerializer(typeof(TrackData)).
-                Deserialize(file.BaseStream);
-
-            // Close the file
-            file.Close();
-
-            // Return loaded file
-            return loadedTrack;
+                // Load everything into this class with help of the XmlSerializer.
+                TrackData loadedTrack = (TrackData)
+                    new XmlSerializer(typeof(TrackData)).
+                    Deserialize(file.BaseStream);
+                // Return loaded file
+                return loadedTrack;
+            }
         }
-        #endregion
+#endregion
 
     }
 }

@@ -52,24 +52,26 @@ namespace RacingGame.GameScreens
             // Help header
             int posX = 10;
             int posY = 18;
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            {
-                posX += 36;
-                posY += 26;
-            }
+            // UWP COMMENT OUT
+            //if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            //{
+            //    posX += 36;
+            //    posY += 26;
+            //}
             BaseGame.UI.Headers.RenderOnScreenRelative1600(
                 posX, posY, UIRenderer.HeaderHelpGfxRect);
 
             // Help
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            {
-                BaseGame.UI.HelpScreen.RenderOnScreen(
-                    BaseGame.CalcRectangleKeep4To3(
-                    25, 130, BaseGame.UI.HelpScreen.GfxRectangle.Width - 50,
-                    BaseGame.UI.HelpScreen.GfxRectangle.Height - 12),
-                    BaseGame.UI.HelpScreen.GfxRectangle);
-            }
-            else
+            // UWP COMMENT OUT
+            //if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            //{
+            //    BaseGame.UI.HelpScreen.RenderOnScreen(
+            //        BaseGame.CalcRectangleKeep4To3(
+            //        25, 130, BaseGame.UI.HelpScreen.GfxRectangle.Width - 50,
+            //        BaseGame.UI.HelpScreen.GfxRectangle.Height - 12),
+            //        BaseGame.UI.HelpScreen.GfxRectangle);
+            //}
+            //else
             {
                 BaseGame.UI.HelpScreen.RenderOnScreenRelative4To3(
                     0, 125, BaseGame.UI.HelpScreen.GfxRectangle);

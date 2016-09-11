@@ -54,7 +54,7 @@ namespace RacingGame.Helpers
         /// </summary>
         public static void Initialize()
         {
-#if !XBOX360
+#if !XBOX360 && !NETFX_CORE
             try
             {
                 IsolatedStorageFile isolatedStorageFile = IsolatedStorageFile.GetUserStoreForDomain();
@@ -131,7 +131,7 @@ namespace RacingGame.Helpers
 
 #if DEBUG
                 // In debug mode write that message to the console as well!
-                System.Console.WriteLine(s);
+                System.Diagnostics.Debug.WriteLine(s);
 #endif
             }
             catch (IOException)

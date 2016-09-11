@@ -218,7 +218,7 @@ namespace RacingGame.GameLogic
             }
             catch (Exception exc)
             {
-                System.Diagnostics.Trace.WriteLine("Settings Load Failure: " + exc.ToString());
+                System.Diagnostics.Debug.WriteLine("Settings Load Failure: " + exc.ToString());
             }
 
             FileHelper.StorageContainerMRE.Set();
@@ -364,7 +364,7 @@ namespace RacingGame.GameLogic
             }
             catch (Exception exc)
             {
-                System.Diagnostics.Trace.WriteLine("Settings Load Failure: " + exc.ToString());
+                System.Diagnostics.Debug.WriteLine("Settings Load Failure: " + exc.ToString());
             }
 
             FileHelper.StorageContainerMRE.Set();

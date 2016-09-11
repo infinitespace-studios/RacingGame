@@ -173,11 +173,12 @@ namespace RacingGame.GameScreens
             // Cars header
             int posX = 10;
             int posY = 18;
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-            {
-                posX += 36;
-                posY += 26;
-            }
+            // UWP COMMENT OUT
+            //if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            //{
+            //    posX += 36;
+            //    posY += 26;
+            //}
 
             BaseGame.UI.Headers.RenderOnScreenRelative1600(
                 posX, posY, UIRenderer.HeaderChooseCarGfxRect);
