@@ -1,0 +1,37 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RacingGame.PipelineExtension", "RacingGame.PipelineExtension\RacingGame.PipelineExtension.csproj", "{57C9CF94-85C5-4708-8D36-BE2A507864BB}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RacingGame.Shared", "RacingGame.Shared\RacingGame.Shared.shproj", "{38C1D212-23E6-4299-9C90-B9469E8CD984}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RacingGame.DesktopGL", "RacingGame.DesktopGL\RacingGame.DesktopGL.csproj", "{BD035A0E-A598-418D-A142-826E656F6CD1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.Linux", "..\..\Documents\Sandbox\dellis1972\MonoGame\MonoGame.Framework\MonoGame.Framework.Linux.csproj", "{35253CE1-C864-4CD3-8249-4D1319748E8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.Content.Pipeline.Linux", "..\..\Documents\Sandbox\dellis1972\MonoGame\MonoGame.Framework.Content.Pipeline\MonoGame.Framework.Content.Pipeline.Linux.csproj", "{57696462-CE5E-4BC5-80AB-1B959E2420EA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57C9CF94-85C5-4708-8D36-BE2A507864BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57C9CF94-85C5-4708-8D36-BE2A507864BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57C9CF94-85C5-4708-8D36-BE2A507864BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57C9CF94-85C5-4708-8D36-BE2A507864BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD035A0E-A598-418D-A142-826E656F6CD1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD035A0E-A598-418D-A142-826E656F6CD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD035A0E-A598-418D-A142-826E656F6CD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD035A0E-A598-418D-A142-826E656F6CD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35253CE1-C864-4CD3-8249-4D1319748E8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57696462-CE5E-4BC5-80AB-1B959E2420EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57696462-CE5E-4BC5-80AB-1B959E2420EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57696462-CE5E-4BC5-80AB-1B959E2420EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57696462-CE5E-4BC5-80AB-1B959E2420EA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

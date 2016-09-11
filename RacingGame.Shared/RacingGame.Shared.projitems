@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>{38C1D212-23E6-4299-9C90-B9469E8CD984}</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>RacingGame.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Content\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\BasePlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\CarPhysics.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\ChaseCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\Input.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\Player.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\Replay.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\ScreenshotCapturer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameLogic\Physics\SpringPhysicsObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RacingGameManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\CarSelection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\GameScreen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\Help.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\Highscores.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\IGameScreen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\LoadingScreen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\MainMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\Options.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\SplashScreen.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GameScreens\TrackSelection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\BaseGame.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\LensFlare.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\LineManager2D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\LineManager3D.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Material.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\MeshRenderManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Model.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\PlaneRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\TangentVertex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Texture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureFont.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\TextureFontBigNumbers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Graphics\UIRenderer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\ColorHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\Directories.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\FileHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\Log.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\RandomHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\Vector3Helper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Landscapes\Landscape.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\PostScreenGlow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\PostScreenMenu.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\PreScreenSkyCubeMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\RenderToTexture.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\ShaderEffect.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\ShadowMapBlur.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\ShadowMapShader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shaders\VBScreenHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sounds\Sound.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tracks\GuardRail.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tracks\Track.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tracks\TrackColumns.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tracks\TrackCombiModels.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tracks\TrackData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tracks\TrackLine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Tracks\TrackVertex.cs" />
+  </ItemGroup>
+</Project>
