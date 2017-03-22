@@ -2,9 +2,13 @@
 #define SV_POSITION POSITION
 #define VS_SHADERMODEL vs_3_0
 #define PS_SHADERMODEL ps_3_0
-#else
+#elif SM4
 #define VS_SHADERMODEL vs_4_0_level_9_1
 #define PS_SHADERMODEL ps_4_0_level_9_1
+#else
+#define SV_POSITION POSITION
+#define VS_SHADERMODEL vs_2_0
+#define PS_SHADERMODEL ps_2_0
 #endif
 // Shows the sky bg with help of a cube map texture,
 // should be called before anything else is rendered.";
@@ -12,7 +16,7 @@
 // We need view, projection, ambientColor for the scene brightness and
 // diffuseTexture, which is the background cube map texture for the sky.
 
-const float SkyCubeScale = 100.0f;
+static const float SkyCubeScale = 100.0f;
 
 float4x4 view : View;
 float4x4 projection : Projection;
@@ -38,12 +42,12 @@ samplerCUBE diffuseTextureSampler = sampler_state
 
 struct VertexInput
 {
-    float3 pos : POSITION;
+    float3 pos : SV_POSITION;
 };
 
 struct VB_OutputPos3DTexCoord
 {
-    float4 pos      : POSITION;
+    float4 pos      : SV_POSITION;
     float3 texCoord : TEXCOORD0;
 };
 
@@ -77,7 +81,7 @@ technique SkyCubeMap
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_SkyCubeMap();
-        PixelShader  = compile ps_2_0 PS_SkyCubeMap();
+        VertexShader = compile VS_SHADERMODEL VS_SkyCubeMap();
+        PixelShader  = compile PS_SHADERMODEL PS_SkyCubeMap();
     }
 }

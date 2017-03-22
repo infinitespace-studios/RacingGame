@@ -2,15 +2,19 @@
 #define SV_POSITION POSITION
 #define VS_SHADERMODEL vs_3_0
 #define PS_SHADERMODEL ps_3_0
-#else
+#elif SM4
 #define VS_SHADERMODEL vs_4_0_level_9_1
 #define PS_SHADERMODEL ps_4_0_level_9_1
+#else
+#define SV_POSITION POSITION
+#define VS_SHADERMODEL vs_2_0
+#define PS_SHADERMODEL ps_2_0
 #endif
 string description = "Generate and use a shadow map with a directional light";
 
 float4x4 worldViewProj         : WorldViewProjection;
 float4x4 world                 : World;
-float4x4 viewInverse           : ViewInverse;
+float3 viewInverse           : ViewInverse;
 
 // Extra values for this shader
 // Transformation matrix for converting world pos
@@ -88,7 +92,7 @@ float3 GetWorldPos(float3 pos)
 
 float3 GetCameraPos()
 {
-    return viewInverse[3].xyz;
+    return viewInverse;
 }
 
 float3 CalcNormalVector(float3 nor)
@@ -123,18 +127,6 @@ float4 PS_GenerateShadowMap(VB_GenerateShadowMap In) : COLOR
     // Format should be R32F or R16F, if that is not possible
     // A8R8G8B8 is used, which is obviously not that precise.
     return In.depth;
-}
-
-technique GenerateShadowMap
-{
-    pass P0
-    {
-        // Disable culling to throw shadow even if virtual
-        // shadow light is inside big buildings!
-        CullMode = None;
-        VertexShader = compile VS_SHADERMODEL VS_GenerateShadowMap();
-        PixelShader  = compile PS_SHADERMODEL PS_GenerateShadowMap();
-    }
 }
 
 //-------------------------------------------------------------------
@@ -205,49 +197,6 @@ sampler ShadowMapSampler = sampler_state
     MagFilter = Linear;
     MipFilter = None;
 };
-
-// Vertex shader output structure for using the shadow map, ps_1_1 version
-struct VB_UseShadowMap
-{
-    float4 pos            : SV_POSITION;
-    float2 shadowTexCoord : TEXCOORD0;
-    float4 depthCompareHelper : TEXCOORD1;
-    float4 depth          : COLOR0;
-};
-
-VB_UseShadowMap VS_UseShadowMap(VertexInput In)
-{
-    VB_UseShadowMap Out = (VB_UseShadowMap)0;
-    // Convert to float4 pos, used several times here.
-    float4 pos = float4(In.pos, 1);
-    Out.pos = mul(pos, worldViewProj);
-
-    // Transform model-space vertex position to light-space:
-    float4 shadowTexPos =
-        mul(pos, shadowTexTransform);
-    // Set first texture coordinates
-    Out.shadowTexCoord = float2(
-        shadowTexPos.x/shadowTexPos.w,
-        shadowTexPos.y/shadowTexPos.w);
-
-    // Get depth of this point relative to the light position
-    float4 depthPos = mul(pos, worldViewProjLight);
-    
-    // Use farPlane/10 for the internal near plane, we don't have any
-    // objects near the light, use this to get much better percision!
-    float internalNearPlane = farPlane / 10;
-    
-    // Same linear depth calculation as above.
-    // Also substract depthBias to fix shadow mapping artifacts.
-    Out.depth =
-        ((depthPos.z - internalNearPlane)/
-        (farPlane - internalNearPlane)) - depthBias;
-    Out.depthCompareHelper = 0.505f * // little bit above 0.5 to fix overlapping!
-        ((depthPos.z - internalNearPlane)/
-        (farPlane - internalNearPlane)) - depthBias;
-
-    return Out;
-}
 
 //-------------------------------------------------------------------
 

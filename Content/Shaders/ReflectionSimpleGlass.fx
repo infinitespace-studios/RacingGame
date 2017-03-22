@@ -2,9 +2,13 @@
 #define SV_POSITION POSITION
 #define VS_SHADERMODEL vs_3_0
 #define PS_SHADERMODEL ps_3_0
-#else
+#elif SM4
 #define VS_SHADERMODEL vs_4_0_level_9_1
 #define PS_SHADERMODEL ps_4_0_level_9_1
+#else
+#define SV_POSITION POSITION
+#define VS_SHADERMODEL vs_2_0
+#define PS_SHADERMODEL ps_2_0
 #endif
 string description = "Reflection shader for glass materials in RacingGame";
 
@@ -13,7 +17,7 @@ string description = "Reflection shader for glass materials in RacingGame";
 
 float4x4 viewProj              : ViewProjection;
 float4x4 world                 : World;
-float4x4 viewInverse           : ViewInverse;
+float3 viewInverse           : ViewInverse;
 
 float3 lightDir : Direction
 <
@@ -106,91 +110,12 @@ float3 GetWorldPos(float3 pos)
 
 float3 GetCameraPos()
 {
-    return viewInverse[3].xyz;
+    return viewInverse;
 }
 
 float3 CalcNormalVector(float3 nor)
 {
     return normalize(mul(nor, (float3x3)world));
-}
-
-//----------------------------------------------------
-
-// For ps1.1 we can't do this advanced stuff,
-// just render the material with the reflection and basic lighting
-struct VertexOutput_Texture
-{
-    float4 pos          : SV_POSITION;
-    float3 cubeTexCoord : TEXCOORD1;
-    float3 normal       : TEXCOORD2;
-    float3 halfVec        : TEXCOORD3;
-};
-
-// vertex shader
-VertexOutput_Texture VS_ReflectionSpecular(VertexInput In)
-{
-    VertexOutput_Texture Out;
-    Out.pos = TransformPosition(In.pos);
-    float3 normal = CalcNormalVector(In.normal);
-    float3 viewVec = normalize(GetCameraPos() - GetWorldPos(In.pos));
-    float3 R = reflect(-viewVec, normal);
-    R = float3(R.x, R.z, R.y);
-    Out.cubeTexCoord = R;
-    
-    // Determine the eye vector
-    float3 worldEyePos = GetCameraPos();
-    float3 worldVertPos = GetWorldPos(In.pos);
-    
-    // Calc normal vector
-    Out.normal = 0.5 + 0.5 * CalcNormalVector(In.normal);
-    // Eye vector
-    float3 eyeVec = normalize(worldEyePos - worldVertPos);
-    // Half angle vector
-    Out.halfVec = 0.5 + 0.5 *
-        normalize(eyeVec + lightDir);
-
-    return Out;
-}
-
-float4 PS_ReflectionSpecular(VertexOutput_Texture In) : COLOR
-{
-    // Convert colors back to vectors. Without normalization it is
-    // a bit faster (2 instructions less), but not as correct!
-    float3 normal = 2.0 * (saturate(In.normal)-0.5);
-    float3 halfVec = 2.0 * (saturate(In.halfVec)-0.5);
-
-    // Diffuse factor
-    float diff = saturate(dot(normal, lightDir));
-    // Specular factor
-    float spec = saturate(dot(normal, halfVec));
-    //max. possible pow fake with mults here: spec = pow(spec, 8);
-    //same as: spec = spec*spec*spec*spec*spec*spec*spec*spec;
-
-    // (saturate(4*(dot(N,H)^2-0.75))^2*2 is a close approximation
-    // to pow(dot(N,H), 16). I use something like
-    // (saturate(4*(dot(N,H)^4-0.75))^2*2 for approx. pow(dot(N,H), 32)
-    spec = pow(saturate(4*(pow(spec, 2)-0.795)), 2);
-
-    // Output the color
-    float4 diffAmbColor = ambientColor + diff * diffuseColor;
-
-    float3 reflect = In.cubeTexCoord;
-    half4 reflColor = texCUBE(reflectionCubeTextureSampler, reflect);
-    float4 ret = reflColor * reflectionAmount + diffAmbColor;
-    ret.a = alphaFactor;
-    return ret + spec * specularColor;
-}
-
-technique ReflectionSpecular
-{
-    pass P0
-    {
-        AlphaBlendEnable = true;
-        SrcBlend = SrcAlpha;
-        DestBlend = InvSrcAlpha;    
-        VertexShader = compile VS_SHADERMODEL VS_ReflectionSpecular();
-        PixelShader  = compile PS_SHADERMODEL PS_ReflectionSpecular();
-    }
 }
 
 //----------------------------------------------------

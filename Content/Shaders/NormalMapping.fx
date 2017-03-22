@@ -2,9 +2,13 @@
 #define SV_POSITION POSITION
 #define VS_SHADERMODEL vs_3_0
 #define PS_SHADERMODEL ps_3_0
-#else
+#elif SM4
 #define VS_SHADERMODEL vs_4_0_level_9_1
 #define PS_SHADERMODEL ps_4_0_level_9_1
+#else
+#define SV_POSITION POSITION
+#define VS_SHADERMODEL vs_2_0
+#define PS_SHADERMODEL ps_2_0
 #endif
 string description = "Normal mapping shaders for RacingGame";
 
@@ -22,7 +26,7 @@ string description = "Normal mapping shaders for RacingGame";
 
 float4x4 viewProj         : ViewProjection;
 float4x4 world            : World;
-float4x4 viewInverse      : ViewInverse;
+float3 viewInverse      : ViewInverse;
 
 float3 lightDir : Direction
 <
@@ -148,7 +152,7 @@ bool UseAlpha = true;
 // Vertex input structure (used for ALL techniques here!)
 struct VertexInput
 {
-    float3 pos      : POSITION;
+    float3 pos      : SV_POSITION;
     float2 texCoord : TEXCOORD0;
     float3 normal   : NORMAL;
     float3 tangent    : TANGENT;
@@ -157,7 +161,7 @@ struct VertexInput
 // vertex shader output structure
 struct VertexOutput
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 diffTexCoord : TEXCOORD0;
     float2 normTexCoord : TEXCOORD1;
     float3 lightVec     : COLOR0;
@@ -178,7 +182,7 @@ float3 GetWorldPos(float3 pos)
 
 float3 GetCameraPos()
 {
-    return viewInverse[3].xyz;
+    return viewInverse;
 }
 
 float3 CalcNormalVector(float3 nor)
@@ -254,28 +258,8 @@ technique Diffuse
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Diffuse();
-        sampler[0] = (diffuseTextureSampler);
-        sampler[1] = (normalTextureSampler);
-        PixelShaderConstant1[0] = <ambientColor>;
-        PixelShaderConstant1[1] = <diffuseColor>;
-        PixelShader = asm
-        {
-            // Optimized for ps_1_1, uses all possible 8 instructions.
-            ps_1_1
-            // Helper to calculate fake specular power.
-            def c2, 1, 0, 0, 1
-            // Sample diffuse and normal map
-            tex t0
-            tex t1
-            // v0 is lightVector
-            // Convert agb to xyz (costs 1 instuction)
-            lrp r1, c2, t1.w, t1
-            // Now work with r1 instead of t1
-            dp3_sat r0, r1_bx2, v0_bx2
-            mad r0, r0, c1, c0
-            mul r0, r0, t0
-        };
+        VertexShader = compile VS_SHADERMODEL VS_Diffuse();
+		PixelShader = compile PS_SHADERMODEL PS_Diffuse();
     }
 }
 
@@ -284,8 +268,8 @@ technique Diffuse20
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Diffuse();
-        PixelShader  = compile ps_2_0 PS_Diffuse();
+        VertexShader = compile VS_SHADERMODEL VS_Diffuse();
+        PixelShader  = compile PS_SHADERMODEL PS_Diffuse();
     }
 }
 
@@ -322,8 +306,8 @@ technique Diffuse20Transparent
         SrcBlend = SrcAlpha;
         DestBlend = InvSrcAlpha;
         
-        VertexShader = compile vs_1_1 VS_Diffuse();
-        PixelShader  = compile ps_2_0 PS_Diffuse_Transparent();
+        VertexShader = compile VS_SHADERMODEL VS_Diffuse();
+        PixelShader  = compile PS_SHADERMODEL PS_Diffuse_Transparent();
     }
 }
 
@@ -332,7 +316,7 @@ technique Diffuse20Transparent
 // vertex shader output structure (optimized for ps_1_1)
 struct VertexOutput_Specular
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 diffTexCoord : TEXCOORD0;
     float2 normTexCoord : TEXCOORD1;
     float3 viewVec      : TEXCOORD2;
@@ -367,54 +351,61 @@ VertexOutput_Specular VS_Specular(VertexInput In)
     return Out;
 }
 
+float4 PS_Specular(VertexOutput_Specular In) : COLOR
+{
+	return tex2D(diffuseTextureSampler, In.diffTexCoord);
+}
+
 // Techniques
 technique Specular
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Specular();
-        sampler[0] = (diffuseTextureSampler);
-        sampler[1] = (normalTextureSampler);
-        sampler[2] = (NormalizeCubeTextureSampler);
-        PixelShaderConstant1[0] = <ambientColor>;
-        PixelShaderConstant1[2] = <diffuseColor>;
-        PixelShaderConstant1[3] = <specularColor>;
-        PixelShader = asm
-        {
-            // Optimized for ps_1_1, uses all possible 8 instructions.
-            ps_1_1
-            // Helper to calculate fake specular power.
-            def c1, 0, 0, 0, -0.45
-            //def c2, 0, 0, 0, 4
-            def c4, 1, 0, 0, 1
-            // Sample diffuse and normal map
-            tex t0
-            tex t1
-            // Normalize view vector (t2)
-            tex t2
-            // Light vector (t3)
-            texcoord t3
-            // v0 is lightVecDiv3!
-            // Convert agb to xyz (costs 1 instuction)
-            lrp r1.xyz, c4, t1.w, t1
-            // Now work with r1 instead of t1
-            dp3_sat r0.xyz, r1_bx2, t3_bx2
-            mad r1.xyz, r1_bx2, r0, -v0_bx2
-            dp3_sat r1, r1, t2_bx2
-            // Increase pow(spec) effect
-            mul_x2_sat r1.w, r1.w, r1.w
-            //we have to skip 1 mul because we lost 1 instruction because of agb
-            //mul_x2_sat r1.w, r1.w, r1.w
-            mad r0.rgb, r0, c2, c0
-            // Combine 2 instructions because we need 1 more to set alpha!
-            +add_sat r1.w, r1.w, c1.w
-            mul r0.rgb, t0, r0
-            +mul_x2_sat r1.w, r1.w, r1.w
-            mad r0.rgb, r1.w, c3, r0
-            // Set alpha from texture to result color!
-            // Can be combined too :)
-            +mov r0.w, t0.w
-        };
+		VertexShader = compile VS_SHADERMODEL VS_Specular();
+		PixelShader = compile PS_SHADERMODEL PS_Specular();
+        //VertexShader = compile VS_SHADERMODEL VS_Specular();
+        //sampler[0] = (diffuseTextureSampler);
+        //sampler[1] = (normalTextureSampler);
+        //sampler[2] = (NormalizeCubeTextureSampler);
+        //PixelShaderConstant1[0] = <ambientColor>;
+        //PixelShaderConstant1[2] = <diffuseColor>;
+        //PixelShaderConstant1[3] = <specularColor>;
+        //PixelShader = asm
+        //{
+        //    // Optimized for ps_1_1, uses all possible 8 instructions.
+        //    ps_1_1
+        //    // Helper to calculate fake specular power.
+        //    def c1, 0, 0, 0, -0.45
+        //    //def c2, 0, 0, 0, 4
+        //    def c4, 1, 0, 0, 1
+        //    // Sample diffuse and normal map
+        //    tex t0
+        //    tex t1
+        //    // Normalize view vector (t2)
+        //    tex t2
+        //    // Light vector (t3)
+        //    texcoord t3
+        //    // v0 is lightVecDiv3!
+        //    // Convert agb to xyz (costs 1 instuction)
+        //    lrp r1.xyz, c4, t1.w, t1
+        //    // Now work with r1 instead of t1
+        //    dp3_sat r0.xyz, r1_bx2, t3_bx2
+        //    mad r1.xyz, r1_bx2, r0, -v0_bx2
+        //    dp3_sat r1, r1, t2_bx2
+        //    // Increase pow(spec) effect
+        //    mul_x2_sat r1.w, r1.w, r1.w
+        //    //we have to skip 1 mul because we lost 1 instruction because of agb
+        //    //mul_x2_sat r1.w, r1.w, r1.w
+        //    mad r0.rgb, r0, c2, c0
+        //    // Combine 2 instructions because we need 1 more to set alpha!
+        //    +add_sat r1.w, r1.w, c1.w
+        //    mul r0.rgb, t0, r0
+        //    +mul_x2_sat r1.w, r1.w, r1.w
+        //    mad r0.rgb, r1.w, c3, r0
+        //    // Set alpha from texture to result color!
+        //    // Can be combined too :)
+        //    +mov r0.w, t0.w
+        //};
     }
 }
 
@@ -423,7 +414,7 @@ technique Specular
 // vertex shader output structure
 struct VertexOutput_Specular20
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 diffTexCoord : TEXCOORD0;
     float2 normTexCoord : TEXCOORD1;
     float3 lightVec     : TEXCOORD2;
@@ -486,13 +477,39 @@ float4 PS_Specular20(VertexOutput_Specular20 In) : COLOR
     }
 }
 
+//----------------------------------------
+
+// Pixel shader function
+float4 PS_DiffuseSpecular20(VertexOutput_Specular20 In) : COLOR
+{
+	// Grab texture data
+	float4 diffuseTexture = tex2D(diffuseTextureSampler, In.diffTexCoord);
+	float3 normalVector = (2.0 * tex2D(normalTextureSampler, In.normTexCoord).agb) - 1.0;
+	// Normalize normal to fix blocky errors
+	normalVector = normalize(normalVector);
+
+	// Additionally normalize the vectors
+	float3 lightVector = normalize(In.lightVec);
+	float3 viewVector = normalize(In.viewVec);
+	// For ps_2_0 we don't need to unpack the vectors to -1 - 1
+
+	// Compute the angle to the light
+	float bump = saturate(dot(normalVector, lightVector));
+	// Specular factor
+	float3 reflect = normalize(2 * bump * normalVector - lightVector);
+	float spec = pow(saturate(dot(reflect, viewVector)), shininess);
+
+	return diffuseTexture * (ambientColor +
+		bump * (diffuseColor + spec * specularColor));
+}
+
 // Techniques
 technique Specular20
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Specular20();
-        PixelShader  = compile ps_2_0 PS_Specular20();
+        VertexShader = compile VS_SHADERMODEL VS_Specular20();
+        PixelShader  = compile PS_SHADERMODEL PS_Specular20();
     }
 }
 
@@ -503,76 +520,52 @@ technique DiffuseSpecular
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Specular();
-        sampler[0] = (diffuseTextureSampler);
-        sampler[1] = (normalTextureSampler);
-        sampler[2] = (NormalizeCubeTextureSampler);
-        PixelShaderConstant1[0] = <ambientColor>;
-        PixelShaderConstant1[1] = <diffuseColor>;
-        PixelShaderConstant1[2] = <specularColor>;
-        PixelShader = asm
-        {
-            // Optimized for ps_1_1, uses all possible 8 instructions.
-            ps_1_1
-            // Helper to calculate fake specular power.
-            def c3, 0, 0, 0, -0.25
-            //def c2, 0, 0, 0, 4
-            def c4, 1, 0, 0, 1
-            // Sample diffuse and normal map
-            tex t0
-            tex t1
-            // Normalize view vector (t2)
-            tex t2
-            // Light vector (t3)
-            texcoord t3
+		VertexShader = compile VS_SHADERMODEL VS_Specular20();
+		PixelShader = compile PS_SHADERMODEL PS_DiffuseSpecular20();
+        //VertexShader = compile VS_SHADERMODEL VS_Specular();
+        //sampler[0] = (diffuseTextureSampler);
+        //sampler[1] = (normalTextureSampler);
+        //sampler[2] = (NormalizeCubeTextureSampler);
+        //PixelShaderConstant1[0] = <ambientColor>;
+        //PixelShaderConstant1[1] = <diffuseColor>;
+        //PixelShaderConstant1[2] = <specularColor>;
+        //PixelShader = asm
+        //{
+        //    // Optimized for ps_1_1, uses all possible 8 instructions.
+        //    ps_1_1
+        //    // Helper to calculate fake specular power.
+        //    def c3, 0, 0, 0, -0.25
+        //    //def c2, 0, 0, 0, 4
+        //    def c4, 1, 0, 0, 1
+        //    // Sample diffuse and normal map
+        //    tex t0
+        //    tex t1
+        //    // Normalize view vector (t2)
+        //    tex t2
+        //    // Light vector (t3)
+        //    texcoord t3
 
-            // v0 is lightVecDiv3!
-            // Convert agb to xyz (costs 1 instuction)
-            lrp r1.xyz, c4, t1.w, t1
-            // Now work with r1 instead of t1
-            dp3_sat r0, r1_bx2, t3_bx2
-            mad r1.xyz, r1_bx2, r0, -v0_bx2
-            dp3_sat r1, r1, t2_bx2
-            //mul_x2_sat r1.w, r1.w, r1.w
-            //no more instructions left:
-            // mul_x2_sat r1.w, r1.w, r1.w
-            //add_sat r1.w, r1.w, c3.w
-            mad_x2_sat r1.w, r1.w, r1.w, c3.w
-            // r1 = r1 (spec) * specularColor + diffuseColor
-            mad r1, r1.w, c2, c1
-            // r0 = r0 (bump) * r1 (diff+spec color) + ambientColor
-            mad r0, r0, r1, c0
-            // r0 = r0 * diffuseTexture
-            mul r0.rgb, t0, r0
-            +mov r0.w, t0.w
-        };
+        //    // v0 is lightVecDiv3!
+        //    // Convert agb to xyz (costs 1 instuction)
+        //    lrp r1.xyz, c4, t1.w, t1
+        //    // Now work with r1 instead of t1
+        //    dp3_sat r0, r1_bx2, t3_bx2
+        //    mad r1.xyz, r1_bx2, r0, -v0_bx2
+        //    dp3_sat r1, r1, t2_bx2
+        //    //mul_x2_sat r1.w, r1.w, r1.w
+        //    //no more instructions left:
+        //    // mul_x2_sat r1.w, r1.w, r1.w
+        //    //add_sat r1.w, r1.w, c3.w
+        //    mad_x2_sat r1.w, r1.w, r1.w, c3.w
+        //    // r1 = r1 (spec) * specularColor + diffuseColor
+        //    mad r1, r1.w, c2, c1
+        //    // r0 = r0 (bump) * r1 (diff+spec color) + ambientColor
+        //    mad r0, r0, r1, c0
+        //    // r0 = r0 * diffuseTexture
+        //    mul r0.rgb, t0, r0
+        //    +mov r0.w, t0.w
+        //};
     }
-}
-
-//----------------------------------------
-
-// Pixel shader function
-float4 PS_DiffuseSpecular20(VertexOutput_Specular20 In) : COLOR
-{
-    // Grab texture data
-    float4 diffuseTexture = tex2D(diffuseTextureSampler, In.diffTexCoord);
-    float3 normalVector = (2.0 * tex2D(normalTextureSampler, In.normTexCoord).agb) - 1.0;
-    // Normalize normal to fix blocky errors
-    normalVector = normalize(normalVector);
-
-    // Additionally normalize the vectors
-	float3 lightVector = normalize(In.lightVec);
-    float3 viewVector = normalize(In.viewVec);
-    // For ps_2_0 we don't need to unpack the vectors to -1 - 1
-
-    // Compute the angle to the light
-    float bump = saturate(dot(normalVector, lightVector));
-    // Specular factor
-    float3 reflect = normalize(2 * bump * normalVector - lightVector);
-    float spec = pow(saturate(dot(reflect, viewVector)), shininess);
-
-    return diffuseTexture * (ambientColor +
-        bump * (diffuseColor + spec * specularColor));
 }
 
 // Techniques
@@ -580,8 +573,8 @@ technique DiffuseSpecular20
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Specular20();
-        PixelShader  = compile ps_2_0 PS_DiffuseSpecular20();
+        VertexShader = compile VS_SHADERMODEL VS_Specular20();
+        PixelShader  = compile PS_SHADERMODEL PS_DiffuseSpecular20();
     }
 }
 
@@ -590,7 +583,7 @@ technique DiffuseSpecular20
 // vertex shader output structure (optimized for ps_1_1)
 struct VertexOutput_SpecularWithReflection
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 diffTexCoord : TEXCOORD0;
     float2 normTexCoord : TEXCOORD1;
     float3 viewVec      : TEXCOORD2;
@@ -632,145 +625,149 @@ VertexOutput_SpecularWithReflection VS_SpecularWithReflection(VertexInput In)
     return Out;
 }
 
-technique SpecularWithReflection
-{
-    pass P0
-    {
-        // Use the same as Specular
-        VertexShader = compile vs_1_1 VS_SpecularWithReflection();
-        sampler[0] = (diffuseTextureSampler);
-        sampler[1] = (normalTextureSampler);
-        sampler[2] = (NormalizeCubeTextureSampler);
-        sampler[3] = (reflectionCubeTextureSampler);
-        PixelShaderConstant1[0] = <ambientColor>;
-        PixelShaderConstant1[2] = <diffuseColor>;
-        PixelShaderConstant1[3] = <specularColor>;
-        PixelShader = asm
-        {
-            // Optimized for ps_1_1, uses all possible 8 instructions.
-            ps_1_1
-            // Helper to calculate fake specular power.
-            def c1, 0, 0, 0, -0.35
-            //def c2, 0, 0, 0, 4
-            def c4, 1, 0, 0, 1
-            def c5, 0.5, 0.5, 0.5, 1
-            // Sample diffuse and normal map
-            tex t0
-            tex t1
-            // Normalize view vector (t2)
-            tex t2
-            // Light vector (t3)
-            tex t3
-            // v0 is lightVec
-            // v1 is lightVecDiv3!
-            // Convert agb to xyz (costs 1 instuction)
-            lrp r1.xyz, c4, t1.w, t1
-            // Now work with r1 instead of t1
-            dp3_sat r0.xyz, r1_bx2, v0_bx2
-            mad r1.xyz, r1_bx2, r0, -v1_bx2
-            dp3_sat r1, r1, t2_bx2
-            // Increase pow(spec) effect
-            // Adding reflection here
-            mad r0.rgb, t3, c5, r0
-            +mul_x2_sat r1.w, r1.w, r1.w            
-            //we have to skip 1 mul because we lost 1 instruction because of agb
-            //mul_x2_sat r1.w, r1.w, r1.w
-            mad r0.rgb, r0, c2, c0
-            // Combine 2 instructions because we need 1 more to set alpha!
-            +add_sat r1.w, r1.w, c1.w
-            //mul r0.rgb, t0, r0
-            mul r0.rgb, t0, r0
-            +mul_x2_sat r1.w, r1.w, r1.w
-            mad r0.rgb, r1.w, c3, r0
-            // Set alpha from texture to result color!
-            // Can be combined too :)
-            +mov r0.w, t0.w
-        };
-    }
-}
-
-// ------------------------------
-
 // vertex shader output structure
 struct VertexOutput_SpecularWithReflection20
 {
-    float4 pos          : POSITION;
-    float2 texCoord     : TEXCOORD0;
-    float3 lightVec     : TEXCOORD1;
-    float3 viewVec      : TEXCOORD2;
-    float3 cubeTexCoord : TEXCOORD3;
+	float4 pos          : SV_POSITION;
+	float2 texCoord     : TEXCOORD0;
+	float3 lightVec     : TEXCOORD1;
+	float3 viewVec      : TEXCOORD2;
+	float3 cubeTexCoord : TEXCOORD3;
 };
 
 // Vertex shader function
 VertexOutput_SpecularWithReflection20
-    VS_SpecularWithReflection20(VertexInput In)
+VS_SpecularWithReflection20(VertexInput In)
 {
-    VertexOutput_SpecularWithReflection20 Out =
-        (VertexOutput_SpecularWithReflection20) 0;
-    
-    float4 worldVertPos = mul(float4(In.pos.xyz, 1), world);
-    Out.pos = mul(worldVertPos, viewProj);
-    
-    // Copy texture coordinates for diffuse and normal maps
-    Out.texCoord = In.texCoord;
+	VertexOutput_SpecularWithReflection20 Out =
+		(VertexOutput_SpecularWithReflection20)0;
 
-    // Compute the 3x3 tranform from tangent space to object space
-    float3x3 worldToTangentSpace =
-        ComputeTangentMatrix(In.tangent, In.normal);
+	float4 worldVertPos = mul(float4(In.pos.xyz, 1), world);
+	Out.pos = mul(worldVertPos, viewProj);
 
-    float3 worldEyePos = GetCameraPos();
+	// Copy texture coordinates for diffuse and normal maps
+	Out.texCoord = In.texCoord;
 
-    // Transform light vector and pass it as a color (clamped from 0 to 1)
-    // For ps_2_0 we don't need to clamp form 0 to 1
-    Out.lightVec = normalize(mul(worldToTangentSpace, GetLightDir()));
-    Out.viewVec = mul(worldToTangentSpace, worldEyePos - worldVertPos);
+	// Compute the 3x3 tranform from tangent space to object space
+	float3x3 worldToTangentSpace =
+		ComputeTangentMatrix(In.tangent, In.normal);
 
-    float3 normal = CalcNormalVector(In.normal);
-    float3 viewVec = normalize(worldEyePos - worldVertPos);
-    float3 R = reflect(-viewVec, normal);
-    Out.cubeTexCoord = R;
-    
-    // And pass everything to the pixel shader
-    return Out;
+	float3 worldEyePos = GetCameraPos();
+
+	// Transform light vector and pass it as a color (clamped from 0 to 1)
+	// For ps_2_0 we don't need to clamp form 0 to 1
+	Out.lightVec = normalize(mul(worldToTangentSpace, GetLightDir()));
+	Out.viewVec = mul(worldToTangentSpace, worldEyePos - worldVertPos);
+
+	float3 normal = CalcNormalVector(In.normal);
+	float3 viewVec = normalize(worldEyePos - worldVertPos);
+	float3 R = reflect(-viewVec, normal);
+	Out.cubeTexCoord = R;
+
+	// And pass everything to the pixel shader
+	return Out;
 }
 
 // Pixel shader function
 float4 PS_SpecularWithReflection20(VertexOutput_SpecularWithReflection20 In) : COLOR
 {
-    // Grab texture data
-    float4 diffuseTexture = tex2D(diffuseTextureSampler, In.texCoord);
-    float3 normalVector = (2.0 * tex2D(normalTextureSampler, In.texCoord).agb) - 1.0;
-    // Normalize normal to fix blocky errors
-    normalVector = normalize(normalVector);
+	// Grab texture data
+	float4 diffuseTexture = tex2D(diffuseTextureSampler, In.texCoord);
+	float3 normalVector = (2.0 * tex2D(normalTextureSampler, In.texCoord).agb) - 1.0;
+	// Normalize normal to fix blocky errors
+	normalVector = normalize(normalVector);
 
-    // Additionally normalize the vectors
-    float3 lightVector = normalize(In.lightVec);
-    float3 viewVector = normalize(In.viewVec);
-    // Compute the angle to the light
-    float bump = saturate(dot(normalVector, lightVector));
-    // Specular factor
-    float3 reflect = normalize(2 * bump * normalVector - lightVector);
-    float spec = pow(saturate(dot(reflect, viewVector)), shininess);
+	// Additionally normalize the vectors
+	float3 lightVector = normalize(In.lightVec);
+	float3 viewVector = normalize(In.viewVec);
+	// Compute the angle to the light
+	float bump = saturate(dot(normalVector, lightVector));
+	// Specular factor
+	float3 reflect = normalize(2 * bump * normalVector - lightVector);
+	float spec = pow(saturate(dot(reflect, viewVector)), shininess);
 
-    // Darken down bump factor on back faces
-    float4 reflection = texCUBE(reflectionCubeTextureSampler,
-        In.cubeTexCoord);
-    float3 ambDiffColor = ambientColor + bump * diffuseColor;
-    float4 ret;
-    ret.rgb = diffuseTexture * ambDiffColor +
-        bump * spec * specularColor * diffuseTexture.a;
-    ret.rgb *= (0.85f + reflection * 0.75f);
-    // Apply color
-    ret.a = 1.0f;
-    return ret;
+	// Darken down bump factor on back faces
+	float4 reflection = texCUBE(reflectionCubeTextureSampler,
+		In.cubeTexCoord);
+	float3 ambDiffColor = ambientColor + bump * diffuseColor;
+	float4 ret;
+	ret.rgb = diffuseTexture * ambDiffColor +
+		bump * spec * specularColor * diffuseTexture.a;
+	ret.rgb *= (0.85f + reflection * 0.75f);
+	// Apply color
+	ret.a = 1.0f;
+	return ret;
 }
+
+technique SpecularWithReflection
+{
+    pass P0
+    {
+		VertexShader = compile VS_SHADERMODEL VS_SpecularWithReflection20();
+		PixelShader = compile PS_SHADERMODEL PS_SpecularWithReflection20();
+        //// Use the same as Specular
+        //VertexShader = compile VS_SHADERMODEL VS_SpecularWithReflection();
+        //sampler[0] = (diffuseTextureSampler);
+        //sampler[1] = (normalTextureSampler);
+        //sampler[2] = (NormalizeCubeTextureSampler);
+        //sampler[3] = (reflectionCubeTextureSampler);
+        //PixelShaderConstant1[0] = <ambientColor>;
+        //PixelShaderConstant1[2] = <diffuseColor>;
+        //PixelShaderConstant1[3] = <specularColor>;
+        //PixelShader = asm
+        //{
+        //    // Optimized for ps_1_1, uses all possible 8 instructions.
+        //    ps_1_1
+        //    // Helper to calculate fake specular power.
+        //    def c1, 0, 0, 0, -0.35
+        //    //def c2, 0, 0, 0, 4
+        //    def c4, 1, 0, 0, 1
+        //    def c5, 0.5, 0.5, 0.5, 1
+        //    // Sample diffuse and normal map
+        //    tex t0
+        //    tex t1
+        //    // Normalize view vector (t2)
+        //    tex t2
+        //    // Light vector (t3)
+        //    tex t3
+        //    // v0 is lightVec
+        //    // v1 is lightVecDiv3!
+        //    // Convert agb to xyz (costs 1 instuction)
+        //    lrp r1.xyz, c4, t1.w, t1
+        //    // Now work with r1 instead of t1
+        //    dp3_sat r0.xyz, r1_bx2, v0_bx2
+        //    mad r1.xyz, r1_bx2, r0, -v1_bx2
+        //    dp3_sat r1, r1, t2_bx2
+        //    // Increase pow(spec) effect
+        //    // Adding reflection here
+        //    mad r0.rgb, t3, c5, r0
+        //    +mul_x2_sat r1.w, r1.w, r1.w            
+        //    //we have to skip 1 mul because we lost 1 instruction because of agb
+        //    //mul_x2_sat r1.w, r1.w, r1.w
+        //    mad r0.rgb, r0, c2, c0
+        //    // Combine 2 instructions because we need 1 more to set alpha!
+        //    +add_sat r1.w, r1.w, c1.w
+        //    //mul r0.rgb, t0, r0
+        //    mul r0.rgb, t0, r0
+        //    +mul_x2_sat r1.w, r1.w, r1.w
+        //    mad r0.rgb, r1.w, c3, r0
+        //    // Set alpha from texture to result color!
+        //    // Can be combined too :)
+        //    +mov r0.w, t0.w
+        //};
+    }
+}
+
+// ------------------------------
+
+
 
 technique SpecularWithReflection20
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_SpecularWithReflection20();
-        PixelShader  = compile ps_2_0 PS_SpecularWithReflection20();
+        VertexShader = compile VS_SHADERMODEL VS_SpecularWithReflection20();
+        PixelShader  = compile PS_SHADERMODEL PS_SpecularWithReflection20();
     }
 }
 
@@ -780,7 +777,7 @@ technique SpecularWithReflection20
 // just render the material with the reflection and basic lighting
 struct VertexOutput_Texture
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float3 cubeTexCoord : TEXCOORD0;
     float3 normal       : TEXCOORD1;
     float3 halfVec        : TEXCOORD2;
@@ -849,8 +846,8 @@ technique ReflectionSpecular
         AlphaBlendEnable = true;
         SrcBlend = SrcAlpha;
         DestBlend = InvSrcAlpha;    
-        VertexShader = compile vs_1_1 VS_ReflectionSpecular();
-        PixelShader  = compile ps_2_0 PS_ReflectionSpecular();
+        VertexShader = compile VS_SHADERMODEL VS_ReflectionSpecular();
+        PixelShader  = compile PS_SHADERMODEL PS_ReflectionSpecular();
     }
 }
 
@@ -858,7 +855,7 @@ technique ReflectionSpecular
 
 struct VertexOutput20
 {
-    float4 pos      : POSITION;
+    float4 pos      : SV_POSITION;
     float3 normal   : TEXCOORD0;
     float3 viewVec  : TEXCOORD1;
     float3 halfVec  : TEXCOORD2;
@@ -911,8 +908,8 @@ technique ReflectionSpecular20
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_ReflectionSpecular20();
-        PixelShader  = compile ps_2_0 PS_ReflectionSpecular20();
+        VertexShader = compile VS_SHADERMODEL VS_ReflectionSpecular20();
+        PixelShader  = compile PS_SHADERMODEL PS_ReflectionSpecular20();
     }
 }
 
@@ -921,7 +918,7 @@ technique ReflectionSpecular20
 // vertex shader output structure
 struct VertexOutput_SpecularWithReflectionForCar20
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 texCoord     : TEXCOORD0;
     float3 lightVec     : TEXCOORD1;
     float3 viewVec      : TEXCOORD2;
@@ -1001,8 +998,8 @@ technique SpecularWithReflectionForCar20
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_SpecularWithReflectionForCar20();
-        PixelShader  = compile ps_2_0 PS_SpecularWithReflectionForCar20();
+        VertexShader = compile VS_SHADERMODEL VS_SpecularWithReflectionForCar20();
+        PixelShader  = compile PS_SHADERMODEL PS_SpecularWithReflectionForCar20();
     }
 }
 
@@ -1030,78 +1027,80 @@ sampler normalTextureRoadSampler = sampler_state
     MipFilter = Linear;
 };
 
+// Pixel shader function
+float4 PS_SpecularRoad20(VertexOutput_Specular20 In) : COLOR
+{
+	// Grab texture data
+	float4 diffuseTexture = tex2D(diffuseTextureRoadSampler, In.diffTexCoord);
+	float3 normalVector = (2.0*tex2D(normalTextureRoadSampler, In.normTexCoord).agb) - 1.0;
+	// Normalize normal to fix blocky errors
+	normalVector = normalize(normalVector);
+
+	// Additionally normalize the vectors
+	float3 lightVector = normalize(In.lightVec);
+	float3 viewVector = normalize(In.viewVec);
+	// For ps_2_0 we don't need to unpack the vectors to -1 - 1
+
+	// Compute the angle to the light
+	float bump = saturate(dot(normalVector, lightVector));
+	// Specular factor
+	float3 reflect = normalize(2 * bump * normalVector - lightVector);
+	float spec = pow(saturate(dot(reflect, viewVector)), shininess);
+
+	float4 ambDiffColor = ambientColor + bump * diffuseColor;
+	return diffuseTexture * ambDiffColor +
+		bump * spec * specularColor * diffuseTexture.a;
+}
+
 // Techniques
 technique SpecularRoad
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Specular();
-        sampler[0] = (diffuseTextureRoadSampler);
-        sampler[1] = (normalTextureRoadSampler);
-        sampler[2] = (NormalizeCubeTextureSampler);
-        PixelShaderConstant1[0] = <ambientColor>;
-        PixelShaderConstant1[2] = <diffuseColor>;
-        PixelShaderConstant1[3] = <specularColor>;
-        PixelShader = asm
-        {
-            // Optimized for ps_1_1, uses all possible 8 instructions.
-            ps_1_1
-            // Helper to calculate fake specular power.
-            def c1, 0, 0, 0, -0.45
-            def c4, 1, 0, 0, 1
-            // Sample diffuse and normal map
-            tex t0
-            tex t1
-            // Normalize view vector (t2)
-            tex t2
-            // Light vector (t3)
-            texcoord t3
-            // v0 is lightVecDiv3!
-            // Convert agb to xyz (costs 1 instuction)
-            lrp r1.xyz, c4, t1.w, t1
-            // Now work with r1 instead of t1
-            dp3_sat r0.xyz, r1_bx2, t3_bx2
-            mad r1.xyz, r1_bx2, r0, -v0_bx2
-            dp3_sat r1, r1, t2_bx2
-            // Increase pow(spec) effect
-            mul_x2_sat r1.w, r1.w, r1.w
-            //we have to skip 1 mul because we lost 1 instruction because of agb
-            mad r0.rgb, r0, c2, c0
-            // Combine 2 instructions because we need 1 more to set alpha!
-            +add_sat r1.w, r1.w, c1.w
-            mul r0.rgb, t0, r0
-            +mul_x2_sat r1.w, r1.w, r1.w
-            mad r0.rgb, r1.w, c3, r0
-            // Set alpha from texture to result color!
-            // Can be combined too :)
-            +mov r0.w, t0.w
-        };
+		VertexShader = compile VS_SHADERMODEL VS_Specular20();
+		PixelShader = compile PS_SHADERMODEL PS_SpecularRoad20();
+        //VertexShader = compile VS_SHADERMODEL VS_Specular();
+        //sampler[0] = (diffuseTextureRoadSampler);
+        //sampler[1] = (normalTextureRoadSampler);
+        //sampler[2] = (NormalizeCubeTextureSampler);
+        //PixelShaderConstant1[0] = <ambientColor>;
+        //PixelShaderConstant1[2] = <diffuseColor>;
+        //PixelShaderConstant1[3] = <specularColor>;
+        //PixelShader = asm
+        //{
+        //    // Optimized for ps_1_1, uses all possible 8 instructions.
+        //    ps_1_1
+        //    // Helper to calculate fake specular power.
+        //    def c1, 0, 0, 0, -0.45
+        //    def c4, 1, 0, 0, 1
+        //    // Sample diffuse and normal map
+        //    tex t0
+        //    tex t1
+        //    // Normalize view vector (t2)
+        //    tex t2
+        //    // Light vector (t3)
+        //    texcoord t3
+        //    // v0 is lightVecDiv3!
+        //    // Convert agb to xyz (costs 1 instuction)
+        //    lrp r1.xyz, c4, t1.w, t1
+        //    // Now work with r1 instead of t1
+        //    dp3_sat r0.xyz, r1_bx2, t3_bx2
+        //    mad r1.xyz, r1_bx2, r0, -v0_bx2
+        //    dp3_sat r1, r1, t2_bx2
+        //    // Increase pow(spec) effect
+        //    mul_x2_sat r1.w, r1.w, r1.w
+        //    //we have to skip 1 mul because we lost 1 instruction because of agb
+        //    mad r0.rgb, r0, c2, c0
+        //    // Combine 2 instructions because we need 1 more to set alpha!
+        //    +add_sat r1.w, r1.w, c1.w
+        //    mul r0.rgb, t0, r0
+        //    +mul_x2_sat r1.w, r1.w, r1.w
+        //    mad r0.rgb, r1.w, c3, r0
+        //    // Set alpha from texture to result color!
+        //    // Can be combined too :)
+        //    +mov r0.w, t0.w
+        //};
     }
-}
-
-// Pixel shader function
-float4 PS_SpecularRoad20(VertexOutput_Specular20 In) : COLOR
-{
-    // Grab texture data
-    float4 diffuseTexture = tex2D(diffuseTextureRoadSampler, In.diffTexCoord);
-    float3 normalVector = (2.0*tex2D(normalTextureRoadSampler, In.normTexCoord).agb)-1.0;
-    // Normalize normal to fix blocky errors
-    normalVector = normalize(normalVector);
-
-    // Additionally normalize the vectors
-    float3 lightVector = normalize(In.lightVec);
-    float3 viewVector = normalize(In.viewVec);
-    // For ps_2_0 we don't need to unpack the vectors to -1 - 1
-
-    // Compute the angle to the light
-    float bump = saturate(dot(normalVector, lightVector));
-    // Specular factor
-    float3 reflect = normalize(2 * bump * normalVector - lightVector);
-    float spec = pow(saturate(dot(reflect, viewVector)), shininess);
-
-    float4 ambDiffColor = ambientColor + bump * diffuseColor;
-    return diffuseTexture * ambDiffColor +
-        bump * spec * specularColor * diffuseTexture.a;
 }
 
 // Techniques
@@ -1109,7 +1108,7 @@ technique SpecularRoad20
 {
     pass P0
     {
-        VertexShader = compile vs_1_1 VS_Specular20();
-        PixelShader  = compile ps_2_0 PS_SpecularRoad20();
+        VertexShader = compile VS_SHADERMODEL VS_Specular20();
+        PixelShader  = compile PS_SHADERMODEL PS_SpecularRoad20();
     }
 }
