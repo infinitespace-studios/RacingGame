@@ -105,7 +105,7 @@ namespace RacingGame.Sounds
         {
             try
             {
-               /* string dir = Directories.SoundsDirectory;
+                string dir = Directories.SoundsDirectory;
                 audioEngine = new AudioEngine(Path.Combine(dir, "RacingGameManager.xgs"));
                 waveBank = new WaveBank(audioEngine, Path.Combine(dir, "Wave Bank.xwb"));
 
@@ -121,7 +121,7 @@ namespace RacingGame.Sounds
                 musicCategory = audioEngine.GetCategory("Music");
 
                 SetVolumes(GameSettings.Default.SoundVolume,
-                    GameSettings.Default.MusicVolume);*/
+                    GameSettings.Default.MusicVolume);
             }
             catch (NoAudioHardwareException ex)
             {

@@ -277,13 +277,13 @@ namespace RacingGame.Graphics
                         techniqueIndex = effect.Techniques.Count - 1;
                         // If this is NormalMapping, use DiffuseSpecular20 instead
                         // of the last technique (which is SpecularWithReflection20)
-                        if (effect.Techniques[techniqueIndex].Name.Contains(
+                        /*if (effect.Techniques[techniqueIndex].Name.Contains(
                             "SpecularWithReflection"))
                             techniqueIndex -= 2;
                         // Update: We have now 2 more techniques (ReflectionSpecular)
                         if (effect.Techniques[techniqueIndex].Name.Contains(
                             "ReflectionSpecular"))
-                            techniqueIndex -= 4;
+                            techniqueIndex -= 4;*/
                     }
 
                     // Set current technique for rendering below
@@ -485,7 +485,7 @@ namespace RacingGame.Graphics
                 // Start shadow car shader
                 ShaderEffect simpleShader = ShaderEffect.lighting;
                 simpleShader.Render(
-                    "ShadowCar",
+                    "ShadowCar20",
                     delegate
                     {
                         int wheelNumber = 0;

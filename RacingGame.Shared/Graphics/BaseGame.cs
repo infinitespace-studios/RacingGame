@@ -241,8 +241,8 @@ namespace RacingGame.Graphics
 
             alreadyCheckedGraphicsOptions = true;
 
-			usePostScreenShaders = false;//GameSettings.Default.PostScreenEffects;
-            allowShadowMapping = GameSettings.Default.ShadowMapping;
+			usePostScreenShaders = GameSettings.Default.PostScreenEffects;
+            allowShadowMapping = false;// GameSettings.Default.ShadowMapping;
             highDetail = GameSettings.Default.HighDetail;
         }
 
@@ -274,7 +274,7 @@ namespace RacingGame.Graphics
             }
         }
 
-        private static bool allowShadowMapping = true;
+        private static bool allowShadowMapping = false;
         /// <summary>
         /// Allow shadow mapping
         /// </summary>
@@ -1025,6 +1025,7 @@ namespace RacingGame.Graphics
 			#endif
             // Set graphics
             graphicsManager = new GraphicsDeviceManager(this);
+            graphicsManager.GraphicsProfile = GraphicsProfile.HiDef;
 
             graphicsManager.PreparingDeviceSettings +=
                 new EventHandler<PreparingDeviceSettingsEventArgs>(

@@ -101,7 +101,7 @@ namespace RacingGame
                 Color.Teal,
                 Color.Gray,
                 Color.Chocolate,
-                Color.Orange,
+                Color.MonoGameOrange,
                 Color.SeaGreen,
             });
 

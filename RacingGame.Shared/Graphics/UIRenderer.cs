@@ -293,8 +293,8 @@ namespace RacingGame.Graphics
             trophies[2] = new Texture("pokal3");
             font = new TextureFont();
 
-			postScreenMenuShader = null;//new PostScreenMenu();
-			postScreenGameShader = null;//new PostScreenGlow();
+			postScreenMenuShader = new PostScreenMenu();
+			postScreenGameShader = new PostScreenGlow();
             skyCube = new PreScreenSkyCubeMapping();
             lensFlare = new LensFlare(LensFlare.DefaultSunPos);
             BaseGame.LightDirection = LensFlare.DefaultLightPos;
