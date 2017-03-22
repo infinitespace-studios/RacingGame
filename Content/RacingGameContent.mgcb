@@ -3,14 +3,14 @@
 
 /outputDir:bin
 /intermediateDir:obj
-/platform:DesktopGL
+/platform:Windows
 /config:
 /profile:Reach
 /compress:False
 
 #-------------------------------- References --------------------------------#
 
-/reference:..\..\..\..\..\RacingGame.PipelineExtension.dll
+/reference:..\RacingGame.PipelineExtension\bin\Debug\RacingGame.PipelineExtension.dll
 
 #---------------------------------- Content ---------------------------------#
 
