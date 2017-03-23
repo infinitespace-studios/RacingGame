@@ -4,6 +4,18 @@
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
+#define BEGIN_TECHNIQUE(name) \
+	technique name {
+
+#define BEGIN_PASS(name) \
+	pass name \
+	{
+
+#define END_PASS \
+	}				
+
+#define END_TECHNIQUE \
+	}			
 
 #ifdef SM5
 
@@ -15,6 +27,10 @@
 #define TECHNIQUE_NO_VS(name, psname ) \
 	technique name { pass { PixelShader = compile ps_5_0 psname(); } }
 
+#define SHADERS(vsname, psname)	\
+	VertexShader = compile vs_5_0 vsname (); \
+	PixelShader = compile ps_5_0 psname();	
+
 #elif SM4
 
 // Macros for targeting shader model 4.0(DX11)
@@ -25,6 +41,8 @@
 #define TECHNIQUE_NO_VS(name, psname ) \
 	technique name { pass { PixelShader = compile ps_4_0_level_9_1 psname(); } }
 
+#define SHADERS(vsname, psname)	\
+	VertexShader = compile vs_4_0_level_9_1 vsname (); PixelShader = compile ps_4_0_level_9_1 psname();	
 
 #elif OPENGL
 
@@ -36,6 +54,9 @@
 #define TECHNIQUE_NO_VS(name, psname ) \
 	technique name { pass { PixelShader = compile ps_3_0 psname(); } }
 
+#define SHADERS(vsname, psname)	\
+	VertexShader = compile vs_3_0 vsname (); PixelShader = compile ps_3_0 psname();	
+
 #else
 
 // Macros for targeting shader model 2.0 (DX9)
@@ -45,6 +66,9 @@
 
 #define TECHNIQUE_NO_VS(name, psname ) \
 	technique name { pass { PixelShader = compile ps_2_0 psname(); } }
+
+#define SHADERS(vsname, psname)	\
+	VertexShader = compile vs_2_0 vsname (); PixelShader = compile ps_2_0 psname();		
 
 #endif
 
