@@ -1,15 +1,4 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#elif SM4
-#define VS_SHADERMODEL vs_4_0_level_9_3
-#define PS_SHADERMODEL ps_4_0_level_9_3
-#else
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_2_0
-#define PS_SHADERMODEL ps_2_0
-#endif
+#include "Macros.fxh"
 string description = "Post screen shader for glowing with big radius";
 
 // Glow/bloom post processing effect, adjusted for RacingGameManager.
@@ -19,6 +8,7 @@ string description = "Post screen shader for glowing with big radius";
 // This script is only used for FX Composer, most values here
 // are treated as constants by the application anyway.
 // Values starting with an upper letter are constants.
+BEGIN_CONSTANTS
 float Script : STANDARDSGLOBAL
 <
     string ScriptClass = "scene";
@@ -69,6 +59,28 @@ float radialBlurScaleFactor <
 // Render-to-Texture stuff
 float2 windowSize : VIEWPORTPIXELSIZE;
 const float downsampleScale = 0.25;
+
+// blur filter weights
+const half weights7[7] =
+{
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.2,
+    0.1,
+    0.05,
+};  
+
+// Blur Width is only used for ps_2_0, ps_1_1 is optimized!
+float BlurWidth <
+    string UIName = "Blur width";
+    string UIWidget = "slider";
+    float UIMin = 0.0f;
+    float UIMax = 10.0f;
+    float UIStep = 0.5f;
+> = 8.0f;
+END_CONSTANTS
 
 texture sceneMap : RENDERCOLORTARGET
 < 
@@ -151,21 +163,15 @@ sampler blurMap2Sampler = sampler_state
 };
 
 // For the last pass we add this screen border fadeout map to darken the borders
-texture screenBorderFadeoutMap : Diffuse
-<
-    string UIName = "Screen border texture";
-    string ResourceName = "ScreenBorderFadeout.dds";
->;
-sampler screenBorderFadeoutMapSampler = sampler_state 
-{
-    texture = <screenBorderFadeoutMap>;
+BEGIN_DECLARE_TEXTURE (screenBorderFadeoutMap, 0)
     AddressU  = CLAMP;
     AddressV  = CLAMP;
     AddressW  = CLAMP;
     MIPFILTER = NONE;
     MINFILTER = LINEAR;
     MAGFILTER = LINEAR;
-};
+END_DECLARE_TEXTURE;
+
 
 // Returns luminance value of col to convert color to grayscale
 float Luminance(float3 col)
@@ -245,7 +251,7 @@ VB_OutputPos3TexCoords VS_ScreenQuadSampleUp(
 
 
 float4 PS_ComposeFinalImage20(
-    VB_OutputPos3TexCoords In) : COLOR
+    VB_OutputPos3TexCoords In) : SV_TARGET0
 {
     float4 orig = tex2D(radialSceneMapSampler, In.texCoord[0]);
     float4 blur = tex2D(blurMap2Sampler, In.texCoord[1]);
@@ -291,15 +297,6 @@ struct VB_OutputPos8TexCoords
     float2 texCoord[4] : TEXCOORD0;
 };
 
-// Blur Width is only used for ps_2_0, ps_1_1 is optimized!
-float BlurWidth <
-    string UIName = "Blur width";
-    string UIWidget = "slider";
-    float UIMin = 0.0f;
-    float UIMax = 10.0f;
-    float UIStep = 0.5f;
-> = 8.0f;
-
 VB_OutputPos4TexCoords VS_DownSample20(
     float4 pos : SV_POSITION,
     float2 texCoord : TEXCOORD0)
@@ -319,7 +316,7 @@ VB_OutputPos4TexCoords VS_DownSample20(
 }
 
 float4 PS_DownSample20(
-    VB_OutputPos4TexCoords In) : COLOR
+    VB_OutputPos4TexCoords In) : SV_TARGET0
 {
     float4 c;
 
@@ -377,22 +374,10 @@ VB_OutputPos7TexCoords VS_Blur20Vertical(
 	float2 texCoord : TEXCOORD0)
 {
 	return _VS_Blur20(float2 (0, 1), pos, texCoord);
-}
-
-// blur filter weights
-const half weights7[7] =
-{
-    0.05,
-    0.1,
-    0.2,
-    0.3,
-    0.2,
-    0.1,
-    0.05,
-};    
+}  
 
 float4 PS_Blur20DownSampler(
-	VB_OutputPos7TexCoords In) : COLOR
+	VB_OutputPos7TexCoords In) : SV_TARGET0
 {
 	float4 c = 0;
 
@@ -406,7 +391,7 @@ float4 PS_Blur20DownSampler(
 }
 
 float4 PS_Blur20BlurSampler(
-	VB_OutputPos7TexCoords In) : COLOR
+	VB_OutputPos7TexCoords In) : SV_TARGET0
 {
 	float4 c = 0;
 
@@ -446,7 +431,7 @@ VB_OutputPos8TexCoords VS_RadialBlur20(
 }
 
 float4 PS_RadialBlur20(
-    VB_OutputPos8TexCoords In) : COLOR
+    VB_OutputPos8TexCoords In) : SV_TARGET0
 {
     float4 radialBlur = tex2D(sceneMapSampler, In.texCoord[0]);
     for (int i=1; i<4; i++)
@@ -454,47 +439,20 @@ float4 PS_RadialBlur20(
     return radialBlur/4;
 }
 
-// Same for ps_2_0, looks better and allows more control over the parameters.
-technique ScreenGlow20
-{
-    // Generate the radial blur with help of the current scene (finalSceneMap)
-    // This pass is quite slow, but for the high quality of the effect we need
-    // full screen processing and using a lot of texture fetches.
-    pass RadialBlur
-    {
-        // Disable alpha testing, else most pixels will be skipped
-        // because of the highlight HDR technique tricks used here!
-        //AlphaTestEnable = false;
-        VertexShader = compile VS_SHADERMODEL VS_RadialBlur20();
-        PixelShader  = compile PS_SHADERMODEL PS_RadialBlur20();
-    }
-    
-    // Sample full render area down to (1/4, 1/4) of its size!
-    pass DownSample
-    {
-        VertexShader = compile VS_SHADERMODEL VS_DownSample20();
-        PixelShader  = compile PS_SHADERMODEL PS_DownSample20();
-    }
-
-    pass GlowBlur1
-    {
-        VertexShader = compile VS_SHADERMODEL VS_Blur20Horizontal();
-        PixelShader  = compile PS_SHADERMODEL PS_Blur20DownSampler();
-    }
-
-    pass GlowBlur2
-    {
-        VertexShader = compile VS_SHADERMODEL VS_Blur20Vertical();
-        PixelShader  = compile PS_SHADERMODEL PS_Blur20BlurSampler();
-    }
-
-    // And compose the final image with the Blurred Glow and the original image.
-    pass ComposeFinalScene
-    {
-        // Save 1 pass by combining the radial blur effect and the compose pass.
-        // This pass is not as fast as the previous passes (they were done
-        // in 1/16 of the original screen size and executed very fast).
-        VertexShader = compile VS_SHADERMODEL VS_ScreenQuadSampleUp();
-        PixelShader  = compile PS_SHADERMODEL PS_ComposeFinalImage20();
-    }
-}
+BEGIN_TECHNIQUE(ScreenGlow20)
+    BEGIN_PASS(RadialBlur)
+        SHADERS(VS_RadialBlur20,PS_RadialBlur20)
+    END_PASS
+    BEGIN_PASS(DownSample)
+        SHADERS(VS_DownSample20,PS_DownSample20)
+    END_PASS
+    BEGIN_PASS(GlowBlur1)
+        SHADERS(VS_Blur20Horizontal,PS_Blur20DownSampler)
+    END_PASS
+    BEGIN_PASS(GlowBlur2)
+        SHADERS(VS_Blur20Vertical,PS_Blur20BlurSampler)
+    END_PASS    
+    BEGIN_PASS(ComposeFinalScene)
+        SHADERS(VS_ScreenQuadSampleUp,PS_ComposeFinalImage20)
+    END_PASS              
+END_TECHNIQUE

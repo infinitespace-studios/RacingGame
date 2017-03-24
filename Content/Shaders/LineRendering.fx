@@ -1,15 +1,4 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#elif SM4
-#define VS_SHADERMODEL vs_4_0_level_9_1
-#define PS_SHADERMODEL ps_4_0_level_9_1
-#else
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_2_0
-#define PS_SHADERMODEL ps_2_0
-#endif
+#include "Macros.fxh"
 string description = "Line rendering helper shader for XNA";
 
 // Default variables, supported by the engine
@@ -18,13 +7,13 @@ float4x4 worldViewProj : WorldViewProjection;
 struct VertexInput
 {
     float3 pos   : SV_POSITION;
-    float4 color : COLOR;
+    float4 color : COLOR0;
 };
 
 struct VertexOutput 
 {
    float4 pos   : SV_POSITION;
-   float4 color : COLOR;
+   float4 color : COLOR0;
 };
 
 VertexOutput LineRenderingVS(VertexInput In)
@@ -39,7 +28,7 @@ VertexOutput LineRenderingVS(VertexInput In)
     return Out;
 }
 
-float4 LineRenderingPS(VertexOutput In) : Color
+float4 LineRenderingPS(VertexOutput In) : SV_TARGET
 {
     return In.color;
 }
@@ -56,26 +45,10 @@ VertexOutput LineRendering2DVS(VertexInput In)
     return Out;
 }
 
-float4 LineRendering2DPS(VertexOutput In) : Color
+float4 LineRendering2DPS(VertexOutput In) : SV_TARGET
 {
     return In.color;
 }
 
-// Techniques
-technique LineRendering3D
-{
-    pass PassFor3D
-    {
-        VertexShader = compile VS_SHADERMODEL LineRenderingVS();
-        PixelShader = compile PS_SHADERMODEL LineRenderingPS();
-    }
-}
-
-technique LineRendering2D
-{
-    pass PassFor2D
-    {
-        VertexShader = compile VS_SHADERMODEL LineRendering2DVS();
-        PixelShader = compile PS_SHADERMODEL LineRendering2DPS();
-    }
-}
+TECHNIQUE (LineRendering3D, LineRenderingVS, LineRenderingPS)
+TECHNIQUE (LineRendering2D, LineRendering2DVS, LineRendering2DPS)
