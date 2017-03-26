@@ -634,6 +634,7 @@ namespace RacingGame.Shaders
             // This is especially important for derived classes.
             ResetParameters();
             GetParameters();
+            SetParameterDefaultValues();
         }
         #endregion
 
@@ -648,6 +649,11 @@ namespace RacingGame.Shaders
             lastUsedDiffuseTexture = null;
         }
         #endregion
+
+        protected virtual void SetParameterDefaultValues()
+        {
+
+        }
 
         #region Get parameters
         /// <summary>
@@ -692,7 +698,12 @@ namespace RacingGame.Shaders
             if (world != null)
                 world.SetValue(BaseGame.WorldMatrix);
             if (viewInverse != null)
-				viewInverse.SetValue(BaseGame.InverseViewMatrix.Translation);
+            {
+                if (viewInverse.ParameterClass == EffectParameterClass.Matrix)
+                    viewInverse.SetValue(BaseGame.InverseViewMatrix);
+                else
+                    viewInverse.SetValue(BaseGame.InverseViewMatrix.Translation);
+            }
             if (lightDir != null)
                 lightDir.SetValue(BaseGame.LightDirection);
 

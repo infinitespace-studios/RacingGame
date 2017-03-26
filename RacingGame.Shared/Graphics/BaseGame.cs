@@ -242,6 +242,7 @@ namespace RacingGame.Graphics
             alreadyCheckedGraphicsOptions = true;
 
 			usePostScreenShaders = GameSettings.Default.PostScreenEffects;
+            //TODO Fix Shadow Maps!
             allowShadowMapping = false;// GameSettings.Default.ShadowMapping;
             highDetail = GameSettings.Default.HighDetail;
         }
