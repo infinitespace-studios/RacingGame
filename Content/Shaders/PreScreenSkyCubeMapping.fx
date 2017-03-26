@@ -1,49 +1,38 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#else
-#define VS_SHADERMODEL vs_4_0_level_9_1
-#define PS_SHADERMODEL ps_4_0_level_9_1
-#endif
+#include "Macros.fxh"
 // Shows the sky bg with help of a cube map texture,
 // should be called before anything else is rendered.";
 
 // We need view, projection, ambientColor for the scene brightness and
 // diffuseTexture, which is the background cube map texture for the sky.
-
-const float SkyCubeScale = 100.0f;
+BEGIN_CONSTANTS
+static const float SkyCubeScale = 100.0f;
 
 float4x4 view : View;
 float4x4 projection : Projection;
 
 // The ambient color for the sky, should be 1 for normal brightness.
 float4 ambientColor : Ambient = {1.0f, 1.0f, 1.0f, 1.0f};
+END_CONSTANTS
 
-// Texture and samplers
-texture diffuseTexture : Environment;
-
-samplerCUBE diffuseTextureSampler = sampler_state
-{
-    Texture = <diffuseTexture>;
-    AddressU  = Wrap;
-    AddressV  = Wrap;
-    AddressW  = Wrap;
-    MinFilter = Linear;
-    MagFilter = Linear;
-    MipFilter = Linear;
-};
+BEGIN_DECLARE_CUBE_TARGET(diffuseTexture, Environment)
+	AddressU = Wrap;
+	AddressV = Wrap;
+	AddressW = Wrap;
+	MinFilter = Linear;
+	MagFilter = Linear;
+	MipFilter = Linear;
+END_DECLARE_TEXTURE;
 
 //-------------------------------------
 
 struct VertexInput
 {
-    float3 pos : POSITION;
+    float3 pos : SV_POSITION;
 };
 
 struct VB_OutputPos3DTexCoord
 {
-    float4 pos      : POSITION;
+    float4 pos      : SV_POSITION;
     float3 texCoord : TEXCOORD0;
 };
 
@@ -66,18 +55,11 @@ VB_OutputPos3DTexCoord VS_SkyCubeMap(VertexInput In)
     return Out;
 }
 
-float4 PS_SkyCubeMap(VB_OutputPos3DTexCoord In) : COLOR
+float4 PS_SkyCubeMap(VB_OutputPos3DTexCoord In) : SV_TARGET
 {
     float4 texCol = ambientColor *
-        texCUBE(diffuseTextureSampler, In.texCoord);
+        SAMPLE_CUBE(diffuseTexture, In.texCoord);
     return texCol;
 }
 
-technique SkyCubeMap
-{
-    pass P0
-    {
-        VertexShader = compile vs_1_1 VS_SkyCubeMap();
-        PixelShader  = compile ps_2_0 PS_SkyCubeMap();
-    }
-}
+TECHNIQUE (SkyCubeMap, VS_SkyCubeMap, PS_SkyCubeMap)

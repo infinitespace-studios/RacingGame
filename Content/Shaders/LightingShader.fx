@@ -1,41 +1,38 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#else
-#define VS_SHADERMODEL vs_4_0_level_9_1
-#define PS_SHADERMODEL ps_4_0_level_9_1
-#endif
+#include "Macros.fxh"
 // Simple shader for RacingGame
+BEGIN_CONSTANTS
 float4x4 worldViewProj : WorldViewProjection;
 float4x4 world : World;
-float4x4 viewInverse : ViewInverse;
+float3 viewInverse : ViewInverse;
 
-float3 lightDir : Direction
+const static float3 lightDir : Direction
 <
     string Object = "DirectionalLight";
     string Space = "World";
 > = { 1, 0, 0 };
 
-float4 ambientColor : Ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
-float4 diffuseColor : Diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
-float4 specularColor : Specular = { 1.0, 1.0, 1.0f, 1.0f };
-float specularPower : SpecularPower = 24.0f;
+const static float4 ambientColor : Ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+const static float4 diffuseColor : Diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
+const static float4 specularColor : Specular = { 1.0, 1.0, 1.0f, 1.0f };
+const static float specularPower : SpecularPower = 24.0f;
 
-texture diffuseTexture : Diffuse
+// Special shader for car rendering, which allows to change the car color!
+float4 shadowCarColor
 <
-    string ResourceName = "marble.jpg";
->;
-sampler diffuseTextureSampler = sampler_state
-{
-    Texture = <diffuseTexture>;
+    string UIName = "Shadow Car Color";
+    string Space = "material";
+> = {1.0f, 1.0f, 1.0f, 0.125f};
+
+END_CONSTANTS
+
+BEGIN_DECLARE_TEXTURE(diffuseTexture, 0)
     AddressU  = Wrap;
     AddressV  = Wrap;
     AddressW  = Wrap;
     MinFilter=linear;
     MagFilter=linear;
     MipFilter=linear;
-};
+END_DECLARE_TEXTURE;
 
 // Vertex input structure (used for ALL techniques here!)
 struct VertexInput
@@ -68,7 +65,7 @@ float3 GetWorldPos(float3 pos)
 
 float3 GetCameraPos()
 {
-    return viewInverse[3].xyz;
+    return viewInverse;
 }
 
 float3 CalcNormalVector(float3 nor)
@@ -99,9 +96,9 @@ VertexOutput_Diffuse VS_Diffuse(VertexInput In)
 }
 
 // Pixel shader
-float4 PS_Diffuse(VertexOutput_Diffuse In) : COLOR
+float4 PS_Diffuse(VertexOutput_Diffuse In) : SV_TARGET
 {
-    float4 diffuseTexture = tex2D(diffuseTextureSampler, In.texCoord);
+    float4 textureColor = SAMPLE_TEXTURE(diffuseTexture, In.texCoord);
     // Convert colors back to vectors. Without normalization it is
     // a bit faster (2 instructions less), but not as correct!
     float3 normal = 2.0 * (saturate(In.normal)-0.5);
@@ -111,88 +108,10 @@ float4 PS_Diffuse(VertexOutput_Diffuse In) : COLOR
 
     // Output the color
     float4 diffAmbColor = ambientColor + diff * diffuseColor;
-    return diffuseTexture * diffAmbColor;
+    return textureColor * diffAmbColor;
 }
 
-technique Diffuse
-{
-    pass P0
-    {
-        VertexShader = compile VS_SHADERMODEL VS_Diffuse();
-        PixelShader  = compile PS_SHADERMODEL PS_Diffuse();
-    }
-}
-
-// No need to write new shader for ps20
-technique Diffuse20
-{
-    pass P0
-    {
-        VertexShader = compile VS_SHADERMODEL VS_Diffuse();
-        PixelShader  = compile PS_SHADERMODEL PS_Diffuse();
-    }
-}
-
-// -----------------------------------------------------
-
-// Vertex shader for ps_1_1 (specular is just not as strong)
-VertexOutput_SpecularPerPixel VS_SpecularPerPixel(VertexInput In)
-{
-    VertexOutput_SpecularPerPixel Out = (VertexOutput_SpecularPerPixel)0;      
-    Out.pos = TransformPosition(In.pos);
-    Out.texCoord = In.texCoord;
-
-    // Determine the eye vector
-    float3 worldEyePos = GetCameraPos();
-    float3 worldVertPos = GetWorldPos(In.pos);
-
-    // Calc normal vector
-    Out.normal = 0.5 + 0.5 * CalcNormalVector(In.normal);
-    // Eye vector
-    float3 eyeVec = normalize(worldEyePos - worldVertPos);
-    // Half angle vector
-    Out.halfVec = 0.5 + 0.5 * normalize(eyeVec + lightDir);
-
-    // Rest of the calculation is done in pixel shader
-    return Out;
-}
-
-// Pixel shader
-float4 PS_SpecularPerPixel(VertexOutput_SpecularPerPixel In) : COLOR
-{
-    float4 diffuseTexture = tex2D(diffuseTextureSampler, In.texCoord);
-    // Convert colors back to vectors. Without normalization it is
-    // a bit faster (2 instructions less), but not as correct!
-    float3 normal = 2.0 * (saturate(In.normal)-0.5);
-    float3 halfVec = 2.0 * (saturate(In.halfVec)-0.5);
-
-    // Diffuse factor
-    float diff = saturate(dot(normal, lightDir));
-    // Specular factor
-    float spec = saturate(dot(normal, halfVec));
-    //max. possible pow fake with mults here: spec = pow(spec, 8);
-    //same as: spec = spec*spec*spec*spec*spec*spec*spec*spec;
-
-    // (saturate(4*(dot(N,H)^2-0.75))^2*2 is a close approximation
-    // to pow(dot(N,H), 16). I use something like
-    // (saturate(4*(dot(N,H)^4-0.75))^2*2 for approx. pow(dot(N,H), 32)
-    spec = pow(saturate(4*(pow(spec, 2)-0.75)), 2);
-
-    // Output the color
-    float4 diffAmbColor = ambientColor + diff * diffuseColor;
-    return diffuseTexture *
-        diffAmbColor +
-        spec * specularColor * diffuseTexture.a;
-}
-
-technique SpecularPerPixel
-{
-    pass P0
-    {
-        VertexShader = compile VS_SHADERMODEL VS_SpecularPerPixel();
-        PixelShader  = compile PS_SHADERMODEL PS_SpecularPerPixel();
-    }
-}
+TECHNIQUE(Diffuse20, VS_Diffuse, PS_Diffuse)
 
 //-------------------------------------
 
@@ -205,7 +124,7 @@ VertexOutput_SpecularPerPixel VS_SpecularPerPixel20(VertexInput In)
     Out.texCoord = In.texCoord;
     Out.normal = mul(In.normal, world);
     // Eye pos
-    float3 eyePos = viewInverse[3];
+    float3 eyePos = viewInverse;
     // World pos
     float3 worldPos = mul(pos, world);
     // Eye vector
@@ -217,9 +136,9 @@ VertexOutput_SpecularPerPixel VS_SpecularPerPixel20(VertexInput In)
 }
 
 // Pixel shader
-float4 PS_SpecularPerPixel20(VertexOutput_SpecularPerPixel In) : COLOR
+float4 PS_SpecularPerPixel20(VertexOutput_SpecularPerPixel In) : SV_TARGET
 {
-    float4 textureColor = tex2D(diffuseTextureSampler, In.texCoord);
+    float4 textureColor = SAMPLE_TEXTURE(diffuseTexture, In.texCoord);
     float3 normal = normalize(In.normal);
     float brightness = dot(normal, lightDir);
 	float dotp = dot(normal, In.halfVec);
@@ -230,14 +149,7 @@ float4 PS_SpecularPerPixel20(VertexOutput_SpecularPerPixel In) : COLOR
         specular * specularColor;
 }
 
-technique SpecularPerPixel20
-{
-    pass P0
-    {
-        VertexShader = compile VS_SHADERMODEL VS_SpecularPerPixel20();
-        PixelShader = compile PS_SHADERMODEL PS_SpecularPerPixel20();
-    }
-}
+TECHNIQUE(SpecularPerPixel20, VS_SpecularPerPixel20, PS_SpecularPerPixel20)
 
 //---------------------------------------------------
 
@@ -248,47 +160,24 @@ struct VertexOutput_ShadowCar20
     float2 texCoord     : TEXCOORD0;
 };
 
-// Special shader for car rendering, which allows to change the car color!
-float4 shadowCarColor
-<
-    string UIName = "Shadow Car Color";
-    string Space = "material";
-> = {1.0f, 1.0f, 1.0f, 0.125f};
-
 // Vertex shader function
-float4 VS_ShadowCar20(VertexInput In) : POSITION0
+float4 VS_ShadowCar20(VertexInput In) : SV_POSITION
 {
     return TransformPosition(In.pos);
 }
 
 // Pixel shader function
-float4 PS_ShadowCar20() : COLOR
+float4 PS_ShadowCar20() : SV_TARGET
 {
     return shadowCarColor;
 }
 
-technique ShadowCar
-{
-    pass P0
-    {
+BEGIN_TECHNIQUE(ShadowCar20)
+	BEGIN_PASS(P0)
         ZWriteEnable = false;
         AlphaBlendEnable = true;
         SrcBlend = SrcAlpha;
         DestBlend = One;
-        VertexShader = compile VS_SHADERMODEL VS_ShadowCar20();
-        PixelShader  = compile PS_SHADERMODEL PS_ShadowCar20();
-    }
-}
-
-technique ShadowCar20
-{
-    pass P0
-    {
-        ZWriteEnable = false;
-        AlphaBlendEnable = true;
-        SrcBlend = SrcAlpha;
-        DestBlend = One;
-        VertexShader = compile VS_SHADERMODEL VS_ShadowCar20();
-        PixelShader  = compile PS_SHADERMODEL PS_ShadowCar20();
-    }
-}
+		SHADERS(VS_ShadowCar20, PS_ShadowCar20)
+	END_PASS
+END_TECHNIQUE
