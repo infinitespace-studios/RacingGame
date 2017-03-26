@@ -346,6 +346,7 @@ float4 PS_Specular20(VertexOutput_Specular20 In) : SV_TARGET
         bump * spec * specularColor * diffusePixel.a;
 }
 
+
 TECHNIQUE(Specular20, VS_Specular20, PS_Specular20)
 
 //----------------------------------------

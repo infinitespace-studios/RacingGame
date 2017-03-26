@@ -138,8 +138,6 @@ BEGIN_TECHNIQUE(GenerateShadowMap20)
         SHADERS(VS_GenerateShadowMap20,PS_GenerateShadowMap20)
     END_PASS
 END_TECHNIQUE
-
-
 //-------------------------------------------------------------------
 
 BEGIN_DECLARE_TEXTURE (ShadowMap, 1)

@@ -248,7 +248,6 @@ BEGIN_TECHNIQUE(Diffuse20Transparent)
 	END_PASS
 END_TECHNIQUE
 
-
 //------------------------------------------------
 
 // vertex shader output structure (optimized for ps_1_1)
@@ -393,7 +392,6 @@ float4 PS_DiffuseSpecular20(VertexOutput_Specular20 In) : SV_TARGET
 TECHNIQUE(Specular20, VS_Specular20, PS_Specular20)
 TECHNIQUE(DiffuseSpecular, VS_Specular20, PS_DiffuseSpecular20)
 TECHNIQUE(DiffuseSpecular20, VS_Specular20, PS_DiffuseSpecular20)
-
 // ------------------------------
 
 // vertex shader output structure (optimized for ps_1_1)
@@ -517,7 +515,6 @@ float4 PS_SpecularWithReflection20(VertexOutput_SpecularWithReflection20 In) : S
 
 TECHNIQUE(SpecularWithReflection, VS_SpecularWithReflection20, PS_SpecularWithReflection20)
 TECHNIQUE(SpecularWithReflection20, VS_SpecularWithReflection20, PS_SpecularWithReflection20)
-
 //----------------------------------------------------
 
 // For ps1.1 we can't do this advanced stuff,
