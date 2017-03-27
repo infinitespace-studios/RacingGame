@@ -14,7 +14,7 @@ float4x4 worldViewProjLight : WorldViewProjection;
 
 BEGIN_CONSTANTS
 // Hand adjusted near and far plane for better percision.
-const float nearPlane = 2.0f; // not used
+const float nearPlane = 2.0f;
 const float farPlane = 8.0f;
 // Depth bias, controls how much we remove from the depth
 // to fix depth checking artifacts. For ps_1_1 this should
@@ -30,7 +30,7 @@ const float shadowMapDepthBias = -0.0005f;
 // some alpha value (e.g. 0.5) for blending the color to black.
 const float4 ShadowColor = {0.25f, 0.26f, 0.27f, 1.0f};
 
-const float3 lightDir : Direction = {1.0f, -1.0f, 1.0f}; // not used
+const float3 lightDir : Direction = {1.0f, -1.0f, 1.0f};
 
 // Shadown Map size
 const float2 shadowMapTexelSize = float2(1.0f/1024.0f, 1.0f/1024);
@@ -138,7 +138,6 @@ BEGIN_TECHNIQUE(GenerateShadowMap20)
         SHADERS(VS_GenerateShadowMap20,PS_GenerateShadowMap20)
     END_PASS
 END_TECHNIQUE
-
 
 //-------------------------------------------------------------------
 

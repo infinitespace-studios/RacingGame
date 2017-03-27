@@ -1,21 +1,10 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#elif SM4
-#define VS_SHADERMODEL vs_4_0_level_9_3
-#define PS_SHADERMODEL ps_4_0_level_9_3
-#else
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_2_0
-#define PS_SHADERMODEL ps_2_0
-#endif
+#include "Macros.fxh"
 string description =
 "Post screen shader for the menu in RacingGame with glow and various screen effects";
 
 // Glow/bloom with menu effects, adjusted for RacingGameManager.
 // Based on PostScreenGlow.fx
-
+BEGIN_CONSTANTS
 // This script is only used for FX Composer, most values here
 // are treated as constants by the application anyway.
 // Values starting with an upper letter are constants.
@@ -76,85 +65,63 @@ float Speed2 = 0.0016f;
 float ScratchIntensity = 0.605f;
 float IS = 0.031f;
 
-texture sceneMap : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 1.0, 1.0 };
-    int MIPLEVELS = 1;
->;
-sampler sceneMapSampler = sampler_state 
+// blur filter weights
+const half weights7[7] =
 {
-    texture = <sceneMap>;
-    AddressU  = CLAMP;
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
+	0.05,
+	0.1,
+	0.2,
+	0.3,
+	0.2,
+	0.1,
+	0.05,
 };
+END_CONSTANTS
 
-texture downsampleMap : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 0.25, 0.25 };
-    int MIPLEVELS = 1;
->;
-sampler downsampleMapSampler = sampler_state 
-{
-    texture = <downsampleMap>;
-    AddressU  = CLAMP;        
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(sceneMap, RENDERCOLORTARGET)
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+	AddressW = CLAMP;
+	MIPFILTER = NONE;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
-texture blurMap1 : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 0.25, 0.25 };
-    int MIPLEVELS = 1;
->;
-sampler blurMap1Sampler = sampler_state 
-{
-    texture = <blurMap1>;
-    AddressU  = CLAMP;        
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(downsampleMap, RENDERCOLORTARGET)
+AddressU = CLAMP;
+AddressV = CLAMP;
+AddressW = CLAMP;
+MIPFILTER = NONE;
+MINFILTER = LINEAR;
+MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
-texture blurMap2 : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 0.25, 0.25 };
-    int MIPLEVELS = 1;
->;
-sampler blurMap2Sampler = sampler_state 
-{
-    texture = <blurMap2>;
-    AddressU  = CLAMP;        
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(blurMap1, RENDERCOLORTARGET)
+AddressU = CLAMP;
+AddressV = CLAMP;
+AddressW = CLAMP;
+MIPFILTER = NONE;
+MINFILTER = LINEAR;
+MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
-texture noiseMap : Diffuse
-<
-    string UIName = "Noise texture";
-    string ResourceName = "noise128x128.dds";
->;
-sampler noiseMapSampler = sampler_state 
-{
-    texture = <noiseMap>;
-    AddressU  = WRAP;        
-    AddressV  = WRAP;
-    AddressW  = WRAP;
-    MIPFILTER = LINEAR;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(blurMap2, RENDERCOLORTARGET)
+AddressU = CLAMP;
+AddressV = CLAMP;
+AddressW = CLAMP;
+MIPFILTER = NONE;
+MINFILTER = LINEAR;
+MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
+
+BEGIN_DECLARE_TEXTURE_TARGET(noiseMap, RENDERCOLORTARGET)
+AddressU = CLAMP;
+AddressV = CLAMP;
+AddressW = CLAMP;
+MIPFILTER = LINEAR;
+MINFILTER = LINEAR;
+MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
 // Returns luminance value of col to convert color to grayscale
 float Luminance(float3 col)
@@ -193,27 +160,6 @@ struct VB_OutputPos3TexCoordsWithColor
     float color        : COLOR0;
 };
 
-/////////////////////////////
-// ps_1_1 shader functions //
-/////////////////////////////
-
-// Generate texture coordinates to only 2 sample neighbours (can't do more in ps)
-VB_OutputPos2TexCoords VS_DownSample11(
-    float4 pos      : SV_POSITION,
-    float2 texCoord : TEXCOORD0)
-{
-    VB_OutputPos2TexCoords Out = (VB_OutputPos2TexCoords)0;
-    float2 texelSize = DownsampleMultiplicator /
-        (windowSize * downsampleScale);
-    float2 s = texCoord;
-    Out.pos = pos;
-
-    Out.texCoord[0] = s - float2(-1, -1)*texelSize;
-    Out.texCoord[1] = s - float2(+1, +1)*texelSize;
-
-    return Out;
-}
-
 VB_OutputPos2TexCoords VS_ScreenQuad(
     float4 pos      : SV_POSITION, 
     float2 texCoord : TEXCOORD0)
@@ -241,39 +187,8 @@ VB_OutputPos2TexCoords VS_ScreenQuadSampleUp(
     return Out;
 }
 
-static float flashPS11 = 1.0f;
-VB_OutputPos3TexCoordsWithColor VS_ComposeFinalImage11(
-    float4 pos      : SV_POSITION, 
-    float2 texCoord : TEXCOORD0)
-{
-    VB_OutputPos3TexCoordsWithColor Out;
-    float2 texelSize = 1.0 / windowSize;
-    Out.pos = pos;
-    // Scratch texture
-    half flash = 1.0;
-    if(frac(Timer/10)<0.1)
-        flash = 2.0*(0.55+0.45*sin(Timer*3.14f*2));
-
-    if (flash != 1.0f)
-        texCoord.x += (flash-1.5f)/40.0f *
-            cos(Timer+texCoord.y*1.8f);
-        
-    float Side = (Timer*Speed2);
-    float ScanLine = (Timer*Speed);
-    
-    // Don't use bilinear filtering
-    Out.texCoord[0] = texCoord + texelSize*0.5f;
-    Out.texCoord[1] = texCoord + texelSize*0.5f/downsampleScale;
-    Out.texCoord[2] = float2(texCoord.x/5+Side*2, ScanLine);
-    Out.texCoord[2].x *= 4;
-    Out.color = flash-1;
-    flashPS11 = flash;
-    
-    return Out;
-}
-
 float4 PS_ComposeFinalImage20(
-    VB_OutputPos2TexCoords In) : COLOR
+    VB_OutputPos2TexCoords In) : SV_TARGET
 {
     half flash = 1.0;
     if(frac(Timer/10)<0.075)
@@ -284,12 +199,12 @@ float4 PS_ComposeFinalImage20(
         texCoord.x += (flash-1.5f)/40.0f *
             cos(Timer*7+texCoord.y*25.18f);
         
-    float4 orig = tex2D(sceneMapSampler, texCoord);
-    float4 blur = tex2D(blurMap2Sampler, In.texCoord[1]);
+    float4 orig = SAMPLE_TEXTURE(sceneMap, texCoord);
+    float4 blur = SAMPLE_TEXTURE(blurMap2, In.texCoord[1]);
     float Side = (Timer*Speed2);
     float ScanLine = (Timer*Speed);
     float2 s = float2(texCoord.x/5+Side,ScanLine);
-    float scratch = tex2D(noiseMapSampler,s).x;
+    float scratch = SAMPLE_TEXTURE(noiseMap,s).x;
     
     // Add scratches
     scratch = 2.0f*(scratch - ScratchIntensity)/IS;
@@ -349,15 +264,15 @@ VB_OutputPos4TexCoords VS_DownSample20(
     return Out;
 }
 
-float4 PS_DownSample20(VB_OutputPos4TexCoords In) : COLOR
+float4 PS_DownSample20(VB_OutputPos4TexCoords In) : SV_TARGET
 {
     float4 c;
 
     // box filter (only for ps_2_0)
-    c = tex2D(sceneMapSampler, In.texCoord[0])/4;
-    c += tex2D(sceneMapSampler, In.texCoord[1])/4;
-    c += tex2D(sceneMapSampler, In.texCoord[2])/4;
-    c += tex2D(sceneMapSampler, In.texCoord[3])/4;
+    c = SAMPLE_TEXTURE(sceneMap, In.texCoord[0])/4;
+    c += SAMPLE_TEXTURE(sceneMap, In.texCoord[1])/4;
+    c += SAMPLE_TEXTURE(sceneMap, In.texCoord[2])/4;
+    c += SAMPLE_TEXTURE(sceneMap, In.texCoord[3])/4;
     
     // store hilights in alpha, can't use smoothstep version!
     // Fake it with highly optimized version using 80% as treshold.
@@ -406,77 +321,45 @@ VB_OutputPos7TexCoords VS_Blur20Horizontal(
 	float2 texCoord : TEXCOORD0)
 {
 	return _VS_Blur20(float2 (1, 0), pos, texCoord);
-}
-
-// blur filter weights
-const half weights7[7] =
-{
-    0.05,
-    0.1,
-    0.2,
-    0.3,
-    0.2,
-    0.1,
-    0.05,
-};    
+}  
 
 float4 PS_Blur20DownSample(
-	VB_OutputPos7TexCoords In) : COLOR
+	VB_OutputPos7TexCoords In) : SV_TARGET
 {
 	float4 c = 0;
 
 	// this loop will be unrolled by compiler
 	for (int i = 0; i<7; i++)
 	{
-		c += tex2D(downsampleMapSampler, In.texCoord[i]) * weights7[i];
+		c += SAMPLE_TEXTURE(downsampleMap, In.texCoord[i]) * weights7[i];
 	}
 	return c;
 }
 
 float4 PS_Blur20BlurSample(
-	VB_OutputPos7TexCoords In) : COLOR
+	VB_OutputPos7TexCoords In) : SV_TARGET
 {
 	float4 c = 0;
 
 	// this loop will be unrolled by compiler
 	for (int i = 0; i<7; i++)
 	{
-		c += tex2D(blurMap1Sampler, In.texCoord[i]) * weights7[i];
+		c += SAMPLE_TEXTURE(blurMap1, In.texCoord[i]) * weights7[i];
 	}
 	return c;
 }
 
-// Same for ps_2_0, looks better and allows more control over the parameters.
-technique ScreenGlow20
-{
-    // Sample full render area down to (1/4, 1/4) of its size!
-    pass DownSample
-    {
-        // Disable alpha testing, else most pixels will be skipped
-        // because of the highlight HDR technique tricks used here!
-        //AlphaTestEnable = false;
-        VertexShader = compile VS_SHADERMODEL VS_DownSample20();
-        PixelShader  = compile PS_SHADERMODEL PS_DownSample20();
-    }
-
-    pass GlowBlur1
-    {
-        VertexShader = compile VS_SHADERMODEL VS_Blur20Horizontal();
-        PixelShader  = compile PS_SHADERMODEL PS_Blur20DownSample();
-    }
-
-    pass GlowBlur2
-    {
-        VertexShader = compile VS_SHADERMODEL VS_Blur20Vertical();
-        PixelShader  = compile PS_SHADERMODEL PS_Blur20BlurSample();
-    }
-
-    // And compose the final image with the Blurred Glow and the original image.
-    pass ComposeFinalScene
-    {
-        // This pass is not as fast as the previous passes (they were done
-        // in 1/16 of the original screen size and executed very fast).
-        VertexShader = compile VS_SHADERMODEL VS_ScreenQuadSampleUp();
-        PixelShader  = compile PS_SHADERMODEL PS_ComposeFinalImage20();
-    }
-}
+BEGIN_TECHNIQUE(ScreenGlow20)
+	BEGIN_PASS(DownSample)
+		SHADERS(VS_DownSample20, PS_DownSample20)
+	END_PASS
+	BEGIN_PASS(GlowBlur1)
+		SHADERS(VS_Blur20Horizontal, PS_Blur20DownSample)
+	END_PASS
+	BEGIN_PASS(GlowBlur2)
+		SHADERS(VS_Blur20Vertical, PS_Blur20BlurSample)
+	END_PASS
+	BEGIN_PASS(ComposeFinalScene)
+		SHADERS(VS_ScreenQuadSampleUp, PS_ComposeFinalImage20)
+	END_PASS
+END_TECHNIQUE

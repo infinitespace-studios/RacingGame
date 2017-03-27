@@ -130,7 +130,8 @@ namespace RacingGame.Shaders
             shadowMapDepthBias,
             shadowMap,
             shadowMapTexelSize,
-            shadowDistanceFadeoutTexture;
+            shadowDistanceFadeoutTexture,
+            filterTaps;
 
         /// <summary>
         /// Shadow map blur post screen shader, used in RenderShadows
@@ -180,6 +181,23 @@ namespace RacingGame.Shaders
         }
         #endregion
 
+        protected override void SetParameterDefaultValues()
+        {
+            if (filterTaps != null)
+                filterTaps.SetValue(new Vector2[] {
+                    new Vector2 (-0.84052f, -0.073954f),
+                    new Vector2 (-0.326235f, -0.40583f),
+                    new Vector2 (-0.698464f, 0.457259f),
+                    new Vector2 (-0.203356f, 0.6205847f),
+                    new Vector2 (0.96345f, -0.194353f),
+                    new Vector2 (0.473434f, -0.480026f),
+                    new Vector2 (0.519454f, 0.767034f),
+                    new Vector2 (0.185461f, -0.8945231f),
+                    new Vector2 (0.507351f, 0.064963f),
+                    new Vector2 (-0.321932f, 0.5954349f),
+                });
+        }
+
         #region Get parameters
         /// <summary>
         /// Get parameters
@@ -193,13 +211,14 @@ namespace RacingGame.Shaders
             base.GetParameters();
 
             // Get additional parameters
+            filterTaps = effect.Parameters["FilterTaps"];
             shadowTexTransform = effect.Parameters["shadowTexTransform"];
             worldViewProjLight = effect.Parameters["worldViewProjLight"];
             nearPlane = effect.Parameters["nearPlane"];
             farPlane = effect.Parameters["farPlane"];
             depthBias = effect.Parameters["depthBias"];
             shadowMapDepthBias = effect.Parameters["shadowMapDepthBias"];
-            shadowMap = effect.Parameters["shadowMap"];
+            shadowMap = effect.Parameters["ShadowMap"];
             shadowMapTexelSize = effect.Parameters["shadowMapTexelSize"];
             shadowDistanceFadeoutTexture =
                 effect.Parameters["shadowDistanceFadeoutTexture"];

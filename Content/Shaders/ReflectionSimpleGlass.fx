@@ -1,24 +1,12 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#elif SM4
-#define VS_SHADERMODEL vs_4_0_level_9_1
-#define PS_SHADERMODEL ps_4_0_level_9_1
-#else
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_2_0
-#define PS_SHADERMODEL ps_2_0
-#endif
+#include "Macros.fxh"
 string description = "Reflection shader for glass materials in RacingGame";
 
 // Variables that are provided by the application.
 // Support for UIWidget is also added for FXComposer and 3DS Max :)
-
+BEGIN_CONSTANTS
 float4x4 viewProj              : ViewProjection;
 float4x4 world                 : World;
 float3 viewInverse           : ViewInverse;
-
 float3 lightDir : Direction
 <
     string UIName = "Light Direction";
@@ -66,23 +54,16 @@ float alphaFactor
 float fresnelBias = 0.5f;
 float fresnelPower = 1.5f;
 float reflectionAmount = 1.0f;
+END_CONSTANTS
 
-texture reflectionCubeTexture : Environment
-<
-    string UIName = "Reflection cube map";
-    string ResourceType = "CUBE";
-    string ResourceName = "SkyCubeMap.dds";
->;
-samplerCUBE reflectionCubeTextureSampler = sampler_state
-{
-    Texture = <reflectionCubeTexture>;
-    AddressU  = Wrap;
-    AddressV  = Wrap;
-    AddressW  = Wrap;
-    MinFilter = Linear;
-    MagFilter = Linear;
-    MipFilter = Linear;
-};
+BEGIN_DECLARE_CUBE_TARGET(reflectionCubeTexture, Environment)
+	AddressU = Wrap;
+	AddressV = Wrap;
+	AddressW = Wrap;
+	MinFilter = Linear;
+	MagFilter = Linear;
+	MipFilter = Linear;
+END_DECLARE_TEXTURE;
 
 //----------------------------------------------------
 
@@ -139,7 +120,7 @@ VertexOutput20 VS_ReflectionSpecular20(VertexInput In)
     return Out;
 }
 
-float4 PS_ReflectionSpecular20(VertexOutput20 In) : COLOR
+float4 PS_ReflectionSpecular20(VertexOutput20 In) : SV_TARGET
 {
     half3 N = normalize(In.normal);
     float3 V = normalize(In.viewVec);
@@ -147,7 +128,7 @@ float4 PS_ReflectionSpecular20(VertexOutput20 In) : COLOR
     // Reflection
     half3 R = reflect(-V, N);
     R = float3(R.x, R.z, R.y);
-    half4 reflColor = texCUBE(reflectionCubeTextureSampler, R);
+    half4 reflColor = SAMPLE_CUBE(reflectionCubeTexture, R);
     
     // Fresnel
     float3 E = -V;
@@ -170,15 +151,11 @@ float4 PS_ReflectionSpecular20(VertexOutput20 In) : COLOR
     return ret;
 }
 
-technique ReflectionSpecular20
-{
-    pass P0
-    {
-        AlphaBlendEnable = true;
-        SrcBlend = SrcAlpha;
-        DestBlend = InvSrcAlpha;
-        
-        VertexShader = compile VS_SHADERMODEL VS_ReflectionSpecular20();
-        PixelShader  = compile PS_SHADERMODEL PS_ReflectionSpecular20();
-    }
-}
+BEGIN_TECHNIQUE(ReflectionSpecular20)
+	BEGIN_PASS(P0)
+		AlphaBlendEnable = true;
+		SrcBlend = SrcAlpha;
+		DestBlend = InvSrcAlpha;
+		SHADERS(VS_ReflectionSpecular20, PS_ReflectionSpecular20)
+	END_PASS
+END_TECHNIQUE

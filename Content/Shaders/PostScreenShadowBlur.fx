@@ -1,21 +1,11 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#elif SM4
-#define VS_SHADERMODEL vs_4_0_level_9_3
-#define PS_SHADERMODEL ps_4_0_level_9_3
-#else
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_2_0
-#define PS_SHADERMODEL ps_2_0
-#endif
+#include "Macros.fxh"
 string description = "Post screen shader for shadow blurring";
 
 // Blur post processing effect.
 // ScreenAdvancedBlur : 2 pass blur filter (horizontal and vertical) for ps11
 // ScreenAdvancedBlur20 : 2 pass blur filter (horizontal and vertical) for ps20
 
+BEGIN_CONSTANTS
 // This script is only used for FX Composer, most values here
 // are treated as constants by the application anyway.
 // Values starting with an upper letter are constants.
@@ -44,55 +34,41 @@ const float BlurWidth = 1.25f;
 // ps_1_1 can't archive that effect with just 4 samples.
 const float BlurWidth20 = 1.5f;
 
-texture sceneMap : RENDERCOLORTARGET
-<
-    float2 ViewportRatio = { 1.0, 1.0 };
-    int MIPLEVELS = 1;
->;
-sampler sceneMapSampler = sampler_state 
-{
-    texture = <sceneMap>;
-    AddressU  = Clamp;
-    AddressV  = Clamp;
-    AddressW  = Clamp;
-    MIPFILTER = None;
-    MINFILTER = Linear;
-    MAGFILTER = Linear;
-};
-
-// Only for 2 passes (horz/vertical blur)
-texture blurMap : RENDERCOLORTARGET
-<
-    float2 ViewportRatio = { 1.0, 1.0 };
-    int MIPLEVELS = 1;
->;
-sampler blurMapSampler = sampler_state 
-{
-    texture = <blurMap>;
-    AddressU  = Clamp;
-    AddressV  = Clamp;
-    AddressW  = Clamp;
-    MIPFILTER = None;
-    MINFILTER = Linear;
-    MAGFILTER = Linear;
-};
-
-//-----------------------------------------------------------
-
 // 8 Weights for ps_2_0
 const float Weights8[8] =
 {
-    // more strength to middle to reduce effect of lighten up
-    // shadowed areas due mixing and bluring!
-    0.035,
-    0.09,
-    0.125,
-    0.25,
-    0.25,
-    0.125,
-    0.09,
-    0.035,
+	// more strength to middle to reduce effect of lighten up
+	// shadowed areas due mixing and bluring!
+	0.035,
+	0.09,
+	0.125,
+	0.25,
+	0.25,
+	0.125,
+	0.09,
+	0.035,
 };
+END_CONSTANTS
+
+BEGIN_DECLARE_TEXTURE_TARGET (sceneMap, RENDERCOLORTARGET)
+	AddressU = Clamp;
+	AddressV = Clamp;
+	AddressW = Clamp;
+	MIPFILTER = None;
+	MINFILTER = Linear;
+	MAGFILTER = Linear;
+END_DECLARE_TEXTURE;
+
+BEGIN_DECLARE_TEXTURE_TARGET(blurMap, RENDERCOLORTARGET)
+	AddressU = Clamp;
+	AddressV = Clamp;
+	AddressW = Clamp;
+	MIPFILTER = None;
+	MINFILTER = Linear;
+	MAGFILTER = Linear;
+END_DECLARE_TEXTURE;
+
+//-----------------------------------------------------------
 
 struct VB_OutputPos8TexCoords
 {
@@ -132,45 +108,37 @@ VB_OutputPos8TexCoords VS_AdvancedBlur20Horizontal(
 }
 
 float4 PS_AdvancedBlur20Scene(
-	VB_OutputPos8TexCoords In) : COLOR
+	VB_OutputPos8TexCoords In) : SV_TARGET
 {
 	float4 ret = 0;
 	// This loop will be unrolled by the compiler
 	for (int i = 0; i<7; i++)
 	{
-		float4 col = tex2D(sceneMapSampler, In.texCoord[i]);
+		float4 col = SAMPLE_TEXTURE(sceneMap, In.texCoord[i]);
 		ret += col * Weights8[i];
 	}
 	return ret;
 }
 
 float4 PS_AdvancedBlur20Blur(
-	VB_OutputPos8TexCoords In) : COLOR
+	VB_OutputPos8TexCoords In) : SV_TARGET
 {
 	float4 ret = 0;
 	// This loop will be unrolled by the compiler
 	for (int i = 0; i<7; i++)
 	{
-		float4 col = tex2D(blurMapSampler, In.texCoord[i]);
+		float4 col = SAMPLE_TEXTURE(blurMap, In.texCoord[i]);
 		ret += col * Weights8[i];
 	}
 	return ret;
 }
 
-// Advanced blur technique for ps_2_0 with 2 passes (horizontal and vertical)
-// This one uses not only 4, but 8 texture samples!
-technique ScreenAdvancedBlur20
-{
-    // Advanced blur shader
-    pass AdvancedBlurHorizontal
-    {
-        VertexShader = compile VS_SHADERMODEL VS_AdvancedBlur20Horizontal();
-        PixelShader  = compile PS_SHADERMODEL PS_AdvancedBlur20Scene();
-    }
+BEGIN_TECHNIQUE(ScreenAdvancedBlur20)
+	BEGIN_PASS(AdvancedBlurHorizontal)
+		SHADERS(VS_AdvancedBlur20Horizontal, PS_AdvancedBlur20Scene)
+	END_PASS
+	BEGIN_PASS(AdvancedBlurVertical)
+		SHADERS(VS_AdvancedBlur20Vertical, PS_AdvancedBlur20Blur)
+	END_PASS
+END_TECHNIQUE
 
-    pass AdvancedBlurVertical
-    {
-        VertexShader = compile VS_SHADERMODEL VS_AdvancedBlur20Vertical();
-        PixelShader  = compile PS_SHADERMODEL PS_AdvancedBlur20Blur();
-    }
-}

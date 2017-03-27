@@ -1,16 +1,6 @@
-#if OPENGL
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_3_0
-#define PS_SHADERMODEL ps_3_0
-#elif SM4
-#define VS_SHADERMODEL vs_4_0_level_9_1
-#define PS_SHADERMODEL ps_4_0_level_9_1
-#else
-#define SV_POSITION POSITION
-#define VS_SHADERMODEL vs_2_0
-#define PS_SHADERMODEL ps_2_0
-#endif
+#include "Macros.fxh"
 // Simple shader for RacingGame
+BEGIN_CONSTANTS
 float4x4 worldViewProj : WorldViewProjection;
 float4x4 world : World;
 float3 viewInverse : ViewInverse;
@@ -26,20 +16,23 @@ const static float4 diffuseColor : Diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
 const static float4 specularColor : Specular = { 1.0, 1.0, 1.0f, 1.0f };
 const static float specularPower : SpecularPower = 24.0f;
 
-texture diffuseTexture : Diffuse
+// Special shader for car rendering, which allows to change the car color!
+float4 shadowCarColor
 <
-    string ResourceName = "marble.jpg";
->;
-sampler diffuseTextureSampler = sampler_state
-{
-    Texture = <diffuseTexture>;
+    string UIName = "Shadow Car Color";
+    string Space = "material";
+> = {1.0f, 1.0f, 1.0f, 0.125f};
+
+END_CONSTANTS
+
+BEGIN_DECLARE_TEXTURE(diffuseTexture, 0)
     AddressU  = Wrap;
     AddressV  = Wrap;
     AddressW  = Wrap;
     MinFilter=linear;
     MagFilter=linear;
     MipFilter=linear;
-};
+END_DECLARE_TEXTURE;
 
 // Vertex input structure (used for ALL techniques here!)
 struct VertexInput
@@ -103,9 +96,9 @@ VertexOutput_Diffuse VS_Diffuse(VertexInput In)
 }
 
 // Pixel shader
-float4 PS_Diffuse(VertexOutput_Diffuse In) : COLOR
+float4 PS_Diffuse(VertexOutput_Diffuse In) : SV_TARGET
 {
-    float4 diffuseTexture = tex2D(diffuseTextureSampler, In.texCoord);
+    float4 textureColor = SAMPLE_TEXTURE(diffuseTexture, In.texCoord);
     // Convert colors back to vectors. Without normalization it is
     // a bit faster (2 instructions less), but not as correct!
     float3 normal = 2.0 * (saturate(In.normal)-0.5);
@@ -115,18 +108,10 @@ float4 PS_Diffuse(VertexOutput_Diffuse In) : COLOR
 
     // Output the color
     float4 diffAmbColor = ambientColor + diff * diffuseColor;
-    return diffuseTexture * diffAmbColor;
+    return textureColor * diffAmbColor;
 }
 
-// No need to write new shader for ps20
-technique Diffuse20
-{
-    pass P0
-    {
-        VertexShader = compile VS_SHADERMODEL VS_Diffuse();
-        PixelShader  = compile PS_SHADERMODEL PS_Diffuse();
-    }
-}
+TECHNIQUE(Diffuse20, VS_Diffuse, PS_Diffuse)
 
 //-------------------------------------
 
@@ -151,9 +136,9 @@ VertexOutput_SpecularPerPixel VS_SpecularPerPixel20(VertexInput In)
 }
 
 // Pixel shader
-float4 PS_SpecularPerPixel20(VertexOutput_SpecularPerPixel In) : COLOR
+float4 PS_SpecularPerPixel20(VertexOutput_SpecularPerPixel In) : SV_TARGET
 {
-    float4 textureColor = tex2D(diffuseTextureSampler, In.texCoord);
+    float4 textureColor = SAMPLE_TEXTURE(diffuseTexture, In.texCoord);
     float3 normal = normalize(In.normal);
     float brightness = dot(normal, lightDir);
 	float dotp = dot(normal, In.halfVec);
@@ -164,14 +149,7 @@ float4 PS_SpecularPerPixel20(VertexOutput_SpecularPerPixel In) : COLOR
         specular * specularColor;
 }
 
-technique SpecularPerPixel20
-{
-    pass P0
-    {
-        VertexShader = compile VS_SHADERMODEL VS_SpecularPerPixel20();
-        PixelShader = compile PS_SHADERMODEL PS_SpecularPerPixel20();
-    }
-}
+TECHNIQUE(SpecularPerPixel20, VS_SpecularPerPixel20, PS_SpecularPerPixel20)
 
 //---------------------------------------------------
 
@@ -182,13 +160,6 @@ struct VertexOutput_ShadowCar20
     float2 texCoord     : TEXCOORD0;
 };
 
-// Special shader for car rendering, which allows to change the car color!
-float4 shadowCarColor
-<
-    string UIName = "Shadow Car Color";
-    string Space = "material";
-> = {1.0f, 1.0f, 1.0f, 0.125f};
-
 // Vertex shader function
 float4 VS_ShadowCar20(VertexInput In) : SV_POSITION
 {
@@ -196,20 +167,17 @@ float4 VS_ShadowCar20(VertexInput In) : SV_POSITION
 }
 
 // Pixel shader function
-float4 PS_ShadowCar20() : COLOR
+float4 PS_ShadowCar20() : SV_TARGET
 {
     return shadowCarColor;
 }
 
-technique ShadowCar20
-{
-    pass P0
-    {
+BEGIN_TECHNIQUE(ShadowCar20)
+	BEGIN_PASS(P0)
         ZWriteEnable = false;
         AlphaBlendEnable = true;
         SrcBlend = SrcAlpha;
         DestBlend = One;
-        VertexShader = compile VS_SHADERMODEL VS_ShadowCar20();
-        PixelShader  = compile PS_SHADERMODEL PS_ShadowCar20();
-    }
-}
+		SHADERS(VS_ShadowCar20, PS_ShadowCar20)
+	END_PASS
+END_TECHNIQUE

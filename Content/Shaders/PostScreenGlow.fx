@@ -82,85 +82,50 @@ float BlurWidth <
 > = 8.0f;
 END_CONSTANTS
 
-texture sceneMap : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 1.0, 1.0 };
-    int MIPLEVELS = 1;
->;
-sampler sceneMapSampler = sampler_state 
-{
-    texture = <sceneMap>;
-    AddressU  = CLAMP;
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(sceneMap, RENDERCOLORTARGET)
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+	AddressW = CLAMP;
+	MIPFILTER = NONE;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
-texture radialSceneMap : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 1.0, 1.0 };
-    int MIPLEVELS = 1;
->;
-sampler radialSceneMapSampler = sampler_state 
-{
-    texture = <radialSceneMap>;
-    AddressU  = CLAMP;        
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(radialSceneMap, RENDERCOLORTARGET)
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+	AddressW = CLAMP;
+	MIPFILTER = NONE;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
-texture downsampleMap : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 0.25, 0.25 };
-    int MIPLEVELS = 1;
->;
-sampler downsampleMapSampler = sampler_state 
-{
-    texture = <downsampleMap>;
-    AddressU  = CLAMP;        
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(downsampleMap, RENDERCOLORTARGET)
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+	AddressW = CLAMP;
+	MIPFILTER = NONE;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
-texture blurMap1 : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 0.25, 0.25 };
-    int MIPLEVELS = 1;
->;
-sampler blurMap1Sampler = sampler_state 
-{
-    texture = <blurMap1>;
-    AddressU  = CLAMP;        
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(blurMap1, RENDERCOLORTARGET)
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+	AddressW = CLAMP;
+	MIPFILTER = NONE;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
-texture blurMap2 : RENDERCOLORTARGET
-< 
-    float2 ViewportRatio = { 0.25, 0.25 };
-    int MIPLEVELS = 1;
->;
-sampler blurMap2Sampler = sampler_state 
-{
-    texture = <blurMap2>;
-    AddressU  = CLAMP;        
-    AddressV  = CLAMP;
-    AddressW  = CLAMP;
-    MIPFILTER = NONE;
-    MINFILTER = LINEAR;
-    MAGFILTER = LINEAR;
-};
+BEGIN_DECLARE_TEXTURE_TARGET(blurMap2, RENDERCOLORTARGET)
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+	AddressW = CLAMP;
+	MIPFILTER = NONE;
+	MINFILTER = LINEAR;
+	MAGFILTER = LINEAR;
+END_DECLARE_TEXTURE;
 
 // For the last pass we add this screen border fadeout map to darken the borders
 BEGIN_DECLARE_TEXTURE (screenBorderFadeoutMap, 0)
@@ -253,11 +218,11 @@ VB_OutputPos3TexCoords VS_ScreenQuadSampleUp(
 float4 PS_ComposeFinalImage20(
     VB_OutputPos3TexCoords In) : SV_TARGET0
 {
-    float4 orig = tex2D(radialSceneMapSampler, In.texCoord[0]);
-    float4 blur = tex2D(blurMap2Sampler, In.texCoord[1]);
+    float4 orig = SAMPLE_TEXTURE(radialSceneMap, In.texCoord[0]);
+    float4 blur = SAMPLE_TEXTURE(blurMap2, In.texCoord[1]);
 
     float4 screenBorderFadeout =
-        tex2D(screenBorderFadeoutMapSampler, In.texCoord[2]);
+		SAMPLE_TEXTURE(screenBorderFadeoutMap, In.texCoord[2]);
         
     float4 ret =
         0.75f*orig +
@@ -321,10 +286,10 @@ float4 PS_DownSample20(
     float4 c;
 
     // box filter (only for ps_2_0)
-    c = tex2D(radialSceneMapSampler, In.texCoord[0])/4;
-    c += tex2D(radialSceneMapSampler, In.texCoord[1])/4;
-    c += tex2D(radialSceneMapSampler, In.texCoord[2])/4;
-    c += tex2D(radialSceneMapSampler, In.texCoord[3])/4;
+    c = SAMPLE_TEXTURE(radialSceneMap, In.texCoord[0])/4;
+    c += SAMPLE_TEXTURE(radialSceneMap, In.texCoord[1])/4;
+    c += SAMPLE_TEXTURE(radialSceneMap, In.texCoord[2])/4;
+    c += SAMPLE_TEXTURE(radialSceneMap, In.texCoord[3])/4;
 
     // store hilights in alpha, can't use smoothstep version!
     // Fake it with highly optimized version using 80% as treshold.
@@ -384,7 +349,7 @@ float4 PS_Blur20DownSampler(
 	// this loop will be unrolled by compiler
 	for (int i = 0; i<7; i++)
 	{
-		c += tex2D(downsampleMapSampler, In.texCoord[i]) * weights7[i];
+		c += SAMPLE_TEXTURE(downsampleMap, In.texCoord[i]) * weights7[i];
 	}
 
 	return c;
@@ -398,7 +363,7 @@ float4 PS_Blur20BlurSampler(
 	// this loop will be unrolled by compiler
 	for (int i = 0; i<7; i++)
 	{
-		c += tex2D(blurMap1Sampler, In.texCoord[i]) * weights7[i];
+		c += SAMPLE_TEXTURE(blurMap1, In.texCoord[i]) * weights7[i];
 	}
 
 	return c;
@@ -433,9 +398,9 @@ VB_OutputPos8TexCoords VS_RadialBlur20(
 float4 PS_RadialBlur20(
     VB_OutputPos8TexCoords In) : SV_TARGET0
 {
-    float4 radialBlur = tex2D(sceneMapSampler, In.texCoord[0]);
+    float4 radialBlur = SAMPLE_TEXTURE(sceneMap, In.texCoord[0]);
     for (int i=1; i<4; i++)
-        radialBlur += tex2D(sceneMapSampler, In.texCoord[i]);
+        radialBlur += SAMPLE_TEXTURE(sceneMap, In.texCoord[i]);
     return radialBlur/4;
 }
 

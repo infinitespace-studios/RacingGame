@@ -16,8 +16,8 @@ Global Settings
     Header File = RacingGame.h;
     Exclude Category Names = 0;
     Exclude Variable Names = 0;
-    Last Modified Low = 29816700;
-    Last Modified High = 2714263050;
+    Last Modified Low = 2714263050;
+    Last Modified High = 29816700;
 
     Category
     {
@@ -264,7 +264,7 @@ Global Settings
 
         RPC Curve
         {
-            Name = Sound::71fdd355-63c3-4015-affa-ead8c82fe098;
+            Name = Sound::b4ef276e-366d-4934-bb21-1205b6c4750f;
             Property = 1;
             Sound = 1;
             Viewable = 1;
@@ -299,8 +299,7 @@ Global Settings
         Find Best Quality = 0;
         High Freq Cut = 0;
         Loop = 0;
-        PC Format Tag = 2;
-        Samples Per Block = 256;
+        PC Format Tag = 0;
     }
 
     Compression Preset
@@ -312,8 +311,7 @@ Global Settings
         Find Best Quality = 0;
         High Freq Cut = 0;
         Loop = 0;
-        PC Format Tag = 2;
-        Samples Per Block = 128;
+        PC Format Tag = 0;
     }
 }
 
@@ -326,21 +324,17 @@ Wave Bank
     Windows Bank Path Edited = 1;
     Seek Tables = 1;
     Compression Preset Name = Music Compression;
-    Xbox Bank Last Modified Low = 0;
-    Xbox Bank Last Modified High = 0;
-    PC Bank Last Modified Low = 0;
-    PC Bank Last Modified High = 0;
     Header Last Modified Low = 0;
     Header Last Modified High = 0;
-    Bank Last Revised Low = 0;
-    Bank Last Revised High = 0;
+    Bank Last Revised Low = 1047087721;
+    Bank Last Revised High = 30581574;
 
     Wave
     {
         Name = menu_buttonclick;
         File = waves\menu_buttonclick.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1022565127;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -363,8 +357,8 @@ Wave Bank
     {
         Name = menu_screenback;
         File = waves\menu_screenback.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1022565127;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -387,8 +381,8 @@ Wave Bank
     {
         Name = menu_screenclick;
         File = waves\menu_screenclick.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1022565127;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -411,8 +405,8 @@ Wave Bank
     {
         Name = menu_highlight;
         File = waves\menu_highlight.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1022565127;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -435,8 +429,8 @@ Wave Bank
     {
         Name = RacingGameMenuMusic2;
         File = waves\RacingGame Menu Music 2.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1022565127;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = Music Compression;
 
         Cache
@@ -459,8 +453,8 @@ Wave Bank
     {
         Name = RacingGameGameMusic1;
         File = waves\RacingGame Game Music 1.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1022565127;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = Music Compression;
 
         Cache
@@ -483,8 +477,8 @@ Wave Bank
     {
         Name = RacingGameGameMusic2;
         File = waves\RacingGame Game Music 2.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1022565127;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = Music Compression;
 
         Cache
@@ -507,8 +501,8 @@ Wave Bank
     {
         Name = Gear1ToGear2;
         File = waves\Gear1ToGear2.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -531,8 +525,8 @@ Wave Bank
     {
         Name = Gear2;
         File = waves\Gear2.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -555,8 +549,8 @@ Wave Bank
     {
         Name = Gear2ToGear3;
         File = waves\Gear2ToGear3.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -579,8 +573,8 @@ Wave Bank
     {
         Name = Gear3;
         File = waves\Gear3.wav;
-        Build Settings Last Modified Low = 1819983694;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -603,8 +597,8 @@ Wave Bank
     {
         Name = Gear3ToGear4;
         File = waves\Gear3ToGear4.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -627,8 +621,8 @@ Wave Bank
     {
         Name = Gear4;
         File = waves\Gear4.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -651,8 +645,8 @@ Wave Bank
     {
         Name = Gear4ToGear5;
         File = waves\Gear4ToGear5.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -675,8 +669,8 @@ Wave Bank
     {
         Name = BrakeCurveMajor;
         File = waves\BrakeCurveMajor.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1046941065;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -699,8 +693,8 @@ Wave Bank
     {
         Name = BrakeCurveMinor;
         File = waves\BrakeCurveMinor.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1047087721;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -723,8 +717,8 @@ Wave Bank
     {
         Name = BrakeMajor;
         File = waves\BrakeMajor.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1047087721;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -747,8 +741,8 @@ Wave Bank
     {
         Name = BrakeMinor;
         File = waves\BrakeMinor.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1047087721;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -771,8 +765,8 @@ Wave Bank
     {
         Name = CarCrashMinor;
         File = waves\CarCrashMinor.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1047087721;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -795,8 +789,8 @@ Wave Bank
     {
         Name = CarCrashTotal;
         File = waves\CarCrashTotal.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1047087721;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -819,8 +813,8 @@ Wave Bank
     {
         Name = Gear1;
         File = waves\Gear1.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1047087721;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -843,8 +837,8 @@ Wave Bank
     {
         Name = Gear5;
         File = waves\Gear5.wav;
-        Build Settings Last Modified Low = 1820139944;
-        Build Settings Last Modified High = 29833186;
+        Build Settings Last Modified Low = 1047087721;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = MotorSounds Compression;
 
         Cache
@@ -867,8 +861,8 @@ Wave Bank
     {
         Name = Victory;
         File = waves\Victory.wav;
-        Build Settings Last Modified Low = 2852320394;
-        Build Settings Last Modified High = 29833611;
+        Build Settings Last Modified Low = 1022712819;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -891,8 +885,8 @@ Wave Bank
     {
         Name = CarLose;
         File = waves\CarLose.wav;
-        Build Settings Last Modified Low = 2852320394;
-        Build Settings Last Modified High = 29833611;
+        Build Settings Last Modified Low = 1022712819;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -915,8 +909,8 @@ Wave Bank
     {
         Name = CheckpointBetter;
         File = waves\CheckpointBetter.wav;
-        Build Settings Last Modified Low = 2852320394;
-        Build Settings Last Modified High = 29833611;
+        Build Settings Last Modified Low = 1022712819;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -939,8 +933,8 @@ Wave Bank
     {
         Name = CheckpointWorse;
         File = waves\CheckpointWorse.wav;
-        Build Settings Last Modified Low = 2852320394;
-        Build Settings Last Modified High = 29833611;
+        Build Settings Last Modified Low = 1022712819;
+        Build Settings Last Modified High = 30581574;
         Compression Preset Name = <none>;
 
         Cache
@@ -963,8 +957,8 @@ Wave Bank
     {
         Name = Bleep;
         File = Waves\Bleep.wav;
-        Build Settings Last Modified Low = 1731347780;
-        Build Settings Last Modified High = 29850352;
+        Build Settings Last Modified Low = 1022712819;
+        Build Settings Last Modified High = 30581574;
 
         Cache
         {
@@ -986,8 +980,8 @@ Wave Bank
     {
         Name = Beep;
         File = Waves\Beep.wav;
-        Build Settings Last Modified Low = 1731572352;
-        Build Settings Last Modified High = 29850352;
+        Build Settings Last Modified Low = 1022712819;
+        Build Settings Last Modified High = 30581574;
 
         Cache
         {

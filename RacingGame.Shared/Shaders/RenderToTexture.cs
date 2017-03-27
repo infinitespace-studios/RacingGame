@@ -238,8 +238,8 @@ namespace RacingGame.Shaders
             outSF = SurfaceFormat.Color;
 			outDF = BaseGame.BackBufferDepthFormat;
 			outMSC = MultisampleCount;
-           // BaseGame.Device.Adapter.QueryRenderTargetFormat(BaseGame.Device.GraphicsProfile,
-             //   SurfaceFormat.Rgba64, BaseGame.BackBufferDepthFormat, MultisampleCount, out outSF, out outDF, out outMSC);
+            //BaseGame.Device.Adapter.QueryRenderTargetFormat(BaseGame.Device.GraphicsProfile,
+            //    SurfaceFormat.Rgba64, BaseGame.BackBufferDepthFormat, MultisampleCount, out outSF, out outDF, out outMSC);
 
             if (sizeType == SizeType.ShadowMap)
                 outMSC = 0;
