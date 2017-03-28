@@ -243,7 +243,7 @@ namespace RacingGame.Graphics
 
 			usePostScreenShaders = GameSettings.Default.PostScreenEffects;
             //TODO Fix Shadow Maps!
-            allowShadowMapping = false;// GameSettings.Default.ShadowMapping;
+            allowShadowMapping = GameSettings.Default.ShadowMapping;
             highDetail = GameSettings.Default.HighDetail;
         }
 
@@ -275,7 +275,7 @@ namespace RacingGame.Graphics
             }
         }
 
-        private static bool allowShadowMapping = false;
+        private static bool allowShadowMapping = true;
         /// <summary>
         /// Allow shadow mapping
         /// </summary>
@@ -324,7 +324,7 @@ namespace RacingGame.Graphics
                     GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
             }
 
-#if XBOX360
+#if XBOX360 || XBOXONE
             // Xbox 360 graphics settings are fixed
             graphicsManager.IsFullScreen = true;
             graphicsManager.PreferredBackBufferWidth =

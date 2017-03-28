@@ -1,6 +1,7 @@
 #include "Macros.fxh"
 string description = "Generate and use a shadow map with a directional light";
 
+BEGIN_CONSTANTS
 float4x4 worldViewProj         : WorldViewProjection;
 float4x4 world                 : World;
 float3 viewInverse           : ViewInverse; //not used
@@ -12,7 +13,6 @@ float4x4 shadowTexTransform;
 // worldViewProj of the light projection
 float4x4 worldViewProjLight : WorldViewProjection;
 
-BEGIN_CONSTANTS
 // Hand adjusted near and far plane for better percision.
 const float nearPlane = 2.0f;
 const float farPlane = 8.0f;
@@ -52,7 +52,7 @@ const float2 FilterTaps[10] =
 };
 END_CONSTANTS
 
-BEGIN_DECLARE_TEXTURE (shadowDistanceFadeoutTexture, 0)
+BEGIN_DECLARE_TEXTURE_TARGET (shadowDistanceFadeoutTexture, Diffuse)
     AddressU  = Wrap;
     AddressV  = Wrap;
     AddressW  = Wrap;
@@ -126,7 +126,7 @@ VB_GenerateShadowMap20 VS_GenerateShadowMap20(VertexInput In)
 }
 
 // Pixel shader function
-float4 PS_GenerateShadowMap20(VB_GenerateShadowMap20 In) : SV_TARGET0
+float4 PS_GenerateShadowMap20(VB_GenerateShadowMap20 In) : SV_TARGET
 {
     // Just set the interpolated depth value.
     return (In.depth.x/In.depth.y) + shadowMapDepthBias;
@@ -141,7 +141,7 @@ END_TECHNIQUE
 
 //-------------------------------------------------------------------
 
-BEGIN_DECLARE_TEXTURE (ShadowMap, 1)
+BEGIN_DECLARE_TEXTURE_TARGET (ShadowMap, Diffuse)
     AddressU  = Clamp;
     AddressV  = Clamp;
     MinFilter = Point;
@@ -196,7 +196,7 @@ VB_UseShadowMap20 VS_UseShadowMap20(VertexInput In)
 // However this shader looks blocky like PCF3x3 and should be smoothend
 // out by a good post screen blur filter. This advanced shader does a good
 // job faking the penumbra and can look very good when adjusted carefully.
-float4 PS_UseShadowMap20(VB_UseShadowMap20 In) : SV_TARGET0
+float4 PS_UseShadowMap20(VB_UseShadowMap20 In) : SV_TARGET
 {
     float depth = (In.depth.x/In.depth.y) - depthBias;
 

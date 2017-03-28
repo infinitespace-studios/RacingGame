@@ -235,8 +235,8 @@ namespace RacingGame.Shaders
             //    MultisampleCount = 0;
             //}
 
-            outSF = SurfaceFormat.Color;
-			outDF = BaseGame.BackBufferDepthFormat;
+            outSF = SurfaceFormat.Rgba64;
+            outDF = BaseGame.BackBufferDepthFormat;
 			outMSC = MultisampleCount;
             //BaseGame.Device.Adapter.QueryRenderTargetFormat(BaseGame.Device.GraphicsProfile,
             //    SurfaceFormat.Rgba64, BaseGame.BackBufferDepthFormat, MultisampleCount, out outSF, out outDF, out outMSC);

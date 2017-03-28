@@ -82,7 +82,7 @@ namespace RacingGame.Shaders
         protected override void GetParameters()
         {
             base.GetParameters();
-
+            
             // Load and set cube map texture
             skyCubeMapTexture = BaseGame.Content.Load<TextureCube>(
                 Path.Combine(Directories.ContentDirectory + "\\textures",

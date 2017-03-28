@@ -349,7 +349,6 @@ namespace RacingGame.Shaders
 
             // Resolve the render target to get the texture (required for Xbox)
             shadowMapTexture.Resolve();
-
             // Set render target back to default
             BaseGame.ResetRenderTarget(false);
 

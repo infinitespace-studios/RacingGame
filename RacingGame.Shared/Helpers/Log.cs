@@ -54,7 +54,7 @@ namespace RacingGame.Helpers
         /// </summary>
         public static void Initialize()
         {
-#if !XBOX360 && !NETFX_CORE
+#if !XBOX360 && !NETFX_CORE && !XBOXONE
             try
             {
                 IsolatedStorageFile isolatedStorageFile = IsolatedStorageFile.GetUserStoreForDomain();
@@ -115,7 +115,7 @@ namespace RacingGame.Helpers
         /// </summary>
         static public void Write(string message)
         {
-#if !XBOX360
+#if !XBOX360 && !XBOXONE
             // Can't continue without valid writer
             if (writer == null)
                 return;

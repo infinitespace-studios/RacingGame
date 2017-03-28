@@ -97,6 +97,23 @@ namespace RacingGame.Shaders
         }
         #endregion
 
+        protected override void SetParameterDefaultValues()
+        {
+            base.SetParameterDefaultValues();
+            effect.Parameters["Weights8"].SetValue(new float[] {
+	            // more strength to middle to reduce effect of lighten up
+	            // shadowed areas due mixing and bluring!
+	            0.035f,
+                0.09f,
+                0.125f,
+                0.25f,
+                0.25f,
+                0.125f,
+                0.09f,
+                0.035f,
+            });
+        }
+
         #region Get parameters
         /// <summary>
         /// Reload
@@ -251,6 +268,7 @@ namespace RacingGame.Shaders
             // Restore normal alpha blending
             //BaseGame.Device.RenderState.BlendFunction = BlendFunction.Add;
             BaseGame.SetCurrentAlphaMode(BaseGame.AlphaMode.Default);
+
         }
         #endregion
     }

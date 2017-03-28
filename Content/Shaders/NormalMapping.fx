@@ -65,7 +65,8 @@ float fresnelBias = 0.5f;
 float fresnelPower = 1.5f;
 float reflectionAmount = 1.0f;
 bool UseAlpha = true;
-
+// Special shader for car rendering, which allows to change the car color!
+float3 carHueColor = 0.0;
 END_CONSTANTS
 
 
@@ -650,9 +651,6 @@ struct VertexOutput_SpecularWithReflectionForCar20
     float3 viewVec      : TEXCOORD2;
     float3 cubeTexCoord : TEXCOORD3;
 };
-
-// Special shader for car rendering, which allows to change the car color!
-float3 carHueColor = 0.0;
 
 // Vertex shader function
 VertexOutput_SpecularWithReflectionForCar20
