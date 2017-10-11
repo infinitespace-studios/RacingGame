@@ -1,12 +1,16 @@
 #include "Macros.fxh"
 string description = "Line rendering helper shader for XNA";
 
+BEGIN_CONSTANTS
+
 // Default variables, supported by the engine
 float4x4 worldViewProj : WorldViewProjection;
 
+END_CONSTANTS
+
 struct VertexInput
 {
-    float3 pos   : SV_POSITION;
+    float3 pos   : POSITION;
     float4 color : COLOR0;
 };
 

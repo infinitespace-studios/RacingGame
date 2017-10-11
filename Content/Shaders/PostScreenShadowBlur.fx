@@ -72,13 +72,13 @@ END_DECLARE_TEXTURE;
 
 struct VB_OutputPos8TexCoords
 {
-       float4 pos         : SV_POSITION;
+    float4 pos         : SV_POSITION;
     float2 texCoord[7] : TEXCOORD0;
 };
 
 // generate texcoords for avanced blur
 VB_OutputPos8TexCoords _VS_AdvancedBlur20(
-    float4 pos      : SV_POSITION, 
+    float4 pos      : POSITION,
     float2 texCoord : TEXCOORD0,
     uniform float2 dir)
 {
@@ -94,14 +94,14 @@ VB_OutputPos8TexCoords _VS_AdvancedBlur20(
 }
 
 VB_OutputPos8TexCoords VS_AdvancedBlur20Vertical(
-	float4 pos      : SV_POSITION,
+	float4 pos      : POSITION,
 	float2 texCoord : TEXCOORD0)
 {
 	return _VS_AdvancedBlur20(pos, texCoord, float2 (0, 1));
 }
 
 VB_OutputPos8TexCoords VS_AdvancedBlur20Horizontal(
-	float4 pos      : SV_POSITION,
+	float4 pos      : POSITION,
 	float2 texCoord : TEXCOORD0)
 {
 	return _VS_AdvancedBlur20(pos, texCoord, float2 (1, 0));

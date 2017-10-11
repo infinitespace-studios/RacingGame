@@ -13,8 +13,8 @@ string description = "Normal mapping shaders for RacingGame";
 //                        to diffuse (per vertex)
 // DiffuseSpecular20  : Nicer effect for ps20, also required for 3DS max to show shader!
 BEGIN_CONSTANTS
-float4x4 viewProj         : ViewProjection;
-float4x4 world            : World;
+float4x4 viewProj       : ViewProjection;
+float4x4 world          : World;
 float3 viewInverse      : ViewInverse;
 
 float3 lightDir : Direction
@@ -99,12 +99,12 @@ BEGIN_DECLARE_TEXTURE_TARGET(reflectionCubeTexture, Environment)
 END_DECLARE_TEXTURE;
 
 BEGIN_DECLARE_CUBE_TARGET(NormalizeCubeTexture, Environment)
-AddressU = Wrap;
-AddressV = Wrap;
-AddressW = Wrap;
-MinFilter = Linear;
-MagFilter = Linear;
-MipFilter = None;
+	AddressU = Wrap;
+	AddressV = Wrap;
+	AddressW = Wrap;
+	MinFilter = Linear;
+	MagFilter = Linear;
+	MipFilter = None;
 END_DECLARE_TEXTURE;
 
 //----------------------------------------------------
@@ -112,10 +112,10 @@ END_DECLARE_TEXTURE;
 // Vertex input structure (used for ALL techniques here!)
 struct VertexInput
 {
-    float3 pos      : SV_POSITION;
+    float3 pos      : POSITION;
     float2 texCoord : TEXCOORD0;
     float3 normal   : NORMAL;
-    float3 tangent    : TANGENT;
+    float3 tangent  : TANGENT;
 };
 
 // vertex shader output structure
@@ -525,7 +525,7 @@ struct VertexOutput_Texture
     float4 pos          : SV_POSITION;
     float3 cubeTexCoord : TEXCOORD0;
     float3 normal       : TEXCOORD1;
-    float3 halfVec        : TEXCOORD2;
+    float3 halfVec      : TEXCOORD2;
 };
 
 // vertex shader

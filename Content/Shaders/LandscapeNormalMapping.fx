@@ -105,10 +105,10 @@ END_DECLARE_TEXTURE;
 // Vertex input structure (used for ALL techniques here!)
 struct VertexInput
 {
-    float3 pos      : SV_POSITION;
+    float3 pos      : POSITION0;
     float2 texCoord : TEXCOORD0;
     float3 normal   : NORMAL;
-    float3 tangent    : TANGENT;
+    float3 tangent  : TANGENT;
 };
 
 // vertex shader output structure
@@ -247,7 +247,7 @@ END_TECHNIQUE
 // vertex shader output structure (optimized for ps_1_1)
 struct VertexOutput_Specular
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 diffTexCoord : TEXCOORD0;
     float2 normTexCoord : TEXCOORD1;
     float3 viewVec      : TEXCOORD2;
@@ -289,7 +289,7 @@ VertexOutput_Specular VS_Specular(VertexInput In)
 // vertex shader output structure
 struct VertexOutput_Specular20
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 diffTexCoord : TEXCOORD0;
     float2 normTexCoord : TEXCOORD1;
     float3 lightVec     : TEXCOORD2;
@@ -388,7 +388,7 @@ TECHNIQUE(DiffuseSpecular20, VS_Specular20, PS_DiffuseSpecular20)
 // vertex shader output structure
 struct VertexOutput_SpecularWithReflection20
 {
-    float4 pos          : POSITION;
+    float4 pos          : SV_POSITION;
     float2 texCoord     : TEXCOORD0;
     float3 lightVec     : TEXCOORD1;
     float3 viewVec      : TEXCOORD2;
@@ -464,11 +464,11 @@ TECHNIQUE(SpecularWithReflection20, VS_SpecularWithReflection20, PS_SpecularWith
 // vertex shader output structure
 struct VertexOutput_Detail
 {
-    float4 pos          : POSITION;
-    float2 diffTexCoord : TEXCOORD0;
-    float2 normTexCoord : TEXCOORD1;
+    float4 pos            : SV_POSITION;
+    float2 diffTexCoord   : TEXCOORD0;
+    float2 normTexCoord   : TEXCOORD1;
     float2 detailTexCoord : TEXCOORD2;
-    float3 lightVec     : COLOR0;
+    float3 lightVec       : COLOR0;
 };
 
 // Vertex shader function

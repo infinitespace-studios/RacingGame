@@ -65,7 +65,7 @@ END_DECLARE_TEXTURE;
 struct VertexInput
 {
     // We just use the position here, nothing else is required.
-    float3 pos      : SV_POSITION;
+    float3 pos      : POSITION;
 };
 
 // Struct used for passing data from VS_GenerateShadowMap to ps

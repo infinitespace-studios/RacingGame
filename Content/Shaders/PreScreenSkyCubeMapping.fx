@@ -27,7 +27,7 @@ END_DECLARE_TEXTURE;
 
 struct VertexInput
 {
-    float3 pos : SV_POSITION;
+    float3 pos : POSITION;
 };
 
 struct VB_OutputPos3DTexCoord

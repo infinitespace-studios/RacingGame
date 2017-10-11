@@ -146,32 +146,32 @@ float Luminance(float3 col)
 
 struct VB_OutputPosTexCoord
 {
-       float4 pos      : SV_POSITION;
+    float4 pos      : SV_POSITION;
     float2 texCoord : TEXCOORD0;
 };
 
 struct VB_OutputPos2TexCoords
 {
-       float4 pos         : SV_POSITION;
+    float4 pos         : SV_POSITION;
     float2 texCoord[2] : TEXCOORD0;
 };
 
 struct VB_OutputPos3TexCoords
 {
-       float4 pos         : SV_POSITION;
+    float4 pos         : SV_POSITION;
     float2 texCoord[3] : TEXCOORD0;
 };
 
 struct VB_OutputPos4TexCoords
 {
-       float4 pos         : SV_POSITION;
+    float4 pos         : SV_POSITION;
     float2 texCoord[4] : TEXCOORD0;
 };
 
 
 VB_OutputPos4TexCoords VS_SimpleBlur(
     uniform float2 direction,
-    float4 pos      : SV_POSITION, 
+    float4 pos      : POSITION,
     float2 texCoord : TEXCOORD0)
 {
     VB_OutputPos4TexCoords Out = (VB_OutputPos4TexCoords)0;
@@ -187,7 +187,7 @@ VB_OutputPos4TexCoords VS_SimpleBlur(
 }
 
 VB_OutputPos2TexCoords VS_ScreenQuad(
-    float4 pos      : SV_POSITION, 
+    float4 pos      : POSITION,
     float2 texCoord : TEXCOORD0)
 {
     VB_OutputPos2TexCoords Out;
@@ -201,7 +201,7 @@ VB_OutputPos2TexCoords VS_ScreenQuad(
 }
 
 VB_OutputPos3TexCoords VS_ScreenQuadSampleUp(
-    float4 pos      : SV_POSITION, 
+    float4 pos      : POSITION,
     float2 texCoord : TEXCOORD0)
 {
     VB_OutputPos3TexCoords Out;
@@ -263,7 +263,7 @@ struct VB_OutputPos8TexCoords
 };
 
 VB_OutputPos4TexCoords VS_DownSample20(
-    float4 pos : SV_POSITION,
+    float4 pos : POSITION,
     float2 texCoord : TEXCOORD0)
 {
     VB_OutputPos4TexCoords Out;
@@ -311,7 +311,7 @@ float4 PS_DownSample20(
 // Blur downsampled map
 VB_OutputPos7TexCoords _VS_Blur20(
     float2 direction,
-    float4 pos : SV_POSITION, 
+    float4 pos : POSITION,
     float2 texCoord : TEXCOORD0)
 {
     VB_OutputPos7TexCoords Out = (VB_OutputPos7TexCoords)0;
@@ -328,14 +328,14 @@ VB_OutputPos7TexCoords _VS_Blur20(
 }
 
 VB_OutputPos7TexCoords VS_Blur20Horizontal(
-	float4 pos : SV_POSITION,
+	float4 pos : POSITION,
 	float2 texCoord : TEXCOORD0)
 {
 	return _VS_Blur20(float2 (1, 0), pos, texCoord);
 }
 
 VB_OutputPos7TexCoords VS_Blur20Vertical(
-	float4 pos : SV_POSITION,
+	float4 pos : POSITION,
 	float2 texCoord : TEXCOORD0)
 {
 	return _VS_Blur20(float2 (0, 1), pos, texCoord);
@@ -370,7 +370,7 @@ float4 PS_Blur20BlurSampler(
 }
 
 VB_OutputPos8TexCoords VS_RadialBlur20(
-    float4 pos      : SV_POSITION, 
+    float4 pos      : POSITION,
     float2 texCoord : TEXCOORD0)
 {
     VB_OutputPos8TexCoords Out;

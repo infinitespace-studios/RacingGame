@@ -37,19 +37,19 @@ END_DECLARE_TEXTURE;
 // Vertex input structure (used for ALL techniques here!)
 struct VertexInput
 {
-    float3 pos      : SV_POSITION;
+    float3 pos      : POSITION;
     float2 texCoord : TEXCOORD0;
     float3 normal   : NORMAL;
-    float3 tangent    : TANGENT;
+    float3 tangent  : TANGENT;
 };
 
 // Vertex output structure
 struct VertexOutput_SpecularPerPixel
 {
     float4 pos      : SV_POSITION;
-    float2 texCoord    : TEXCOORD0;
+    float2 texCoord : TEXCOORD0;
     float3 normal   : TEXCOORD1;
-    float3 halfVec    : TEXCOORD2;
+    float3 halfVec  : TEXCOORD2;
 };
 
 // Common functions
@@ -77,7 +77,7 @@ float3 CalcNormalVector(float3 nor)
 struct VertexOutput_Diffuse
 {
     float4 pos      : SV_POSITION;
-    float2 texCoord    : TEXCOORD0;
+    float2 texCoord : TEXCOORD0;
     float3 normal   : TEXCOORD1;
 };
 
