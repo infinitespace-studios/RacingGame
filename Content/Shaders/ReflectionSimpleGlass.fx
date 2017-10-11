@@ -70,7 +70,7 @@ END_DECLARE_TEXTURE;
 // Vertex input structure (used for ALL techniques here!)
 struct VertexInput
 {
-    float3 pos      : SV_POSITION;
+    float3 pos      : POSITION;
     float2 texCoord : TEXCOORD0;
     float3 normal   : NORMAL;
     float3 tangent  : TANGENT;
